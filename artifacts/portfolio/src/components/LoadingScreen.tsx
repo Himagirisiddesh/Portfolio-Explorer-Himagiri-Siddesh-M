@@ -1,10 +1,55 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { gsap } from "gsap";
 
-/* ─────────────────────────────────────────────
-   PARTICLE  –  tiny floating dot
-───────────────────────────────────────────── */
+const GLITCH_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&";
+
+/* ─── MOVING WATERMARK ─── */
+function WatermarkRow({ top, direction, speed }: { top: string; direction: "left" | "right"; speed: number }) {
+  const text = "HIMAGIRI SIDDESH";
+  const items = Array.from({ length: 12 }, (_, i) => `${text}   ·   `);
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top,
+        left: 0,
+        right: 0,
+        overflow: "hidden",
+        pointerEvents: "none",
+      }}
+    >
+      <motion.div
+        style={{
+          display: "flex",
+          whiteSpace: "nowrap",
+          width: "max-content",
+        }}
+        animate={{ x: direction === "left" ? ["0%", "-50%"] : ["-50%", "0%"] }}
+        transition={{ duration: speed, repeat: Infinity, ease: "linear" }}
+      >
+        {[...items, ...items].map((txt, i) => (
+          <span
+            key={i}
+            style={{
+              fontSize: "clamp(18px, 2.8vw, 42px)",
+              fontWeight: 800,
+              color: "rgba(0,0,0,0.055)",
+              letterSpacing: "0.15em",
+              fontFamily: "'Geist', -apple-system, 'Helvetica Neue', sans-serif",
+              userSelect: "none",
+              paddingRight: "2em",
+            }}
+          >
+            {txt}
+          </span>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
+
+/* ─── PARTICLE ─── */
 function Particle({ index }: { index: number }) {
   const angle = (index / 28) * 360;
   const radius = 140 + Math.random() * 80;
@@ -24,38 +69,26 @@ function Particle({ index }: { index: number }) {
         top: "50%",
         x: x - size / 2,
         y: y - size / 2,
-        background: `rgba(255,255,255,${0.2 + Math.random() * 0.5})`,
-        boxShadow: `0 0 ${size * 3}px rgba(255,255,255,0.6)`,
+        background: `rgba(0,0,0,${0.12 + Math.random() * 0.25})`,
+        boxShadow: `0 0 ${size * 2}px rgba(0,0,0,0.15)`,
       }}
       animate={{
-        opacity: [0, 0.8, 0],
+        opacity: [0, 0.7, 0],
         scale: [0.5, 1.2, 0.5],
         x: [x - size / 2, x - size / 2 + (Math.random() - 0.5) * 20, x - size / 2],
         y: [y - size / 2, y - size / 2 + (Math.random() - 0.5) * 20, y - size / 2],
       }}
-      transition={{
-        duration,
-        delay,
-        repeat: Infinity,
-        ease: "easeInOut",
-      }}
+      transition={{ duration, delay, repeat: Infinity, ease: "easeInOut" }}
     />
   );
 }
 
-/* ─────────────────────────────────────────────
-   GLITCH CHAR  –  morphing letter
-───────────────────────────────────────────── */
-const GLITCH_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&";
-
-function GlitchChar({ finalChar, delay, isSpace }: { finalChar: string; delay: number; isSpace: boolean }) {
-  const [display, setDisplay] = useState(
-    isSpace ? " " : GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
-  );
+/* ─── GLITCH CHAR ─── */
+function GlitchChar({ finalChar, delay }: { finalChar: string; delay: number }) {
+  const [display, setDisplay] = useState(GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]);
   const [settled, setSettled] = useState(false);
 
   useEffect(() => {
-    if (isSpace) { setDisplay(" "); setSettled(true); return; }
     let frame = 0;
     const totalFrames = 18;
     const timer = setTimeout(() => {
@@ -72,14 +105,14 @@ function GlitchChar({ finalChar, delay, isSpace }: { finalChar: string; delay: n
       return () => clearInterval(interval);
     }, delay);
     return () => clearTimeout(timer);
-  }, [finalChar, delay, isSpace]);
+  }, [finalChar, delay]);
 
   return (
     <span
       style={{
         display: "inline-block",
-        opacity: settled ? 1 : 0.7,
-        color: settled ? "#ffffff" : "#aaaaaa",
+        opacity: settled ? 1 : 0.5,
+        color: settled ? "#000000" : "#888888",
         transition: "color 0.2s ease, opacity 0.2s ease",
         fontFamily: "'Geist', -apple-system, 'Helvetica Neue', sans-serif",
         letterSpacing: "0.18em",
@@ -91,9 +124,7 @@ function GlitchChar({ finalChar, delay, isSpace }: { finalChar: string; delay: n
   );
 }
 
-/* ─────────────────────────────────────────────
-   SHINE OVERLAY
-───────────────────────────────────────────── */
+/* ─── SHINE ─── */
 function ShineEffect({ active }: { active: boolean }) {
   return (
     <AnimatePresence>
@@ -111,8 +142,7 @@ function ShineEffect({ active }: { active: boolean }) {
               left: "-100%",
               width: "60%",
               height: "100%",
-              background:
-                "linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.08) 50%, transparent 80%)",
+              background: "linear-gradient(105deg, transparent 20%, rgba(0,0,0,0.04) 50%, transparent 80%)",
               transform: "skewX(-15deg)",
             }}
             animate={{ left: "200%" }}
@@ -124,9 +154,7 @@ function ShineEffect({ active }: { active: boolean }) {
   );
 }
 
-/* ─────────────────────────────────────────────
-   CAPSULE  –  the glass container
-───────────────────────────────────────────── */
+/* ─── CAPSULE ─── */
 function Capsule({ children, phase }: { children: React.ReactNode; phase: string }) {
   return (
     <motion.div
@@ -135,13 +163,12 @@ function Capsule({ children, phase }: { children: React.ReactNode; phase: string
         width: "clamp(320px, 55vw, 640px)",
         height: "clamp(90px, 12vh, 140px)",
         borderRadius: 9999,
-        background:
-          "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)",
-        border: "1px solid rgba(255,255,255,0.10)",
+        background: "linear-gradient(135deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.02) 100%)",
+        border: "1px solid rgba(0,0,0,0.12)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
         boxShadow:
-          "0 0 0 1px rgba(255,255,255,0.04), 0 8px 40px rgba(0,0,0,0.6), 0 0 80px rgba(255,255,255,0.03), inset 0 1px 0 rgba(255,255,255,0.08)",
+          "0 0 0 1px rgba(0,0,0,0.04), 0 8px 40px rgba(0,0,0,0.08), 0 0 80px rgba(0,0,0,0.02), inset 0 1px 0 rgba(255,255,255,0.8)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -151,14 +178,11 @@ function Capsule({ children, phase }: { children: React.ReactNode; phase: string
         y: phase === "dissolve" ? -40 : [0, -8, 0],
         scale: phase === "dissolve" ? 0.85 : 1,
         opacity: phase === "dissolve" ? 0 : 1,
-        filter:
-          phase === "dissolve"
-            ? "blur(12px)"
-            : "blur(0px)",
+        filter: phase === "dissolve" ? "blur(12px)" : "blur(0px)",
       }}
       transition={
         phase === "dissolve"
-          ? { duration: 1.2, ease: [0.4, 0, 0.2, 1] }
+          ? { duration: 1.0, ease: [0.4, 0, 0.2, 1] }
           : {
               y: { duration: 3.2, repeat: Infinity, ease: "easeInOut" },
               scale: { duration: 0.6 },
@@ -167,14 +191,12 @@ function Capsule({ children, phase }: { children: React.ReactNode; phase: string
             }
       }
     >
-      {/* inner highlight ring */}
       <div
         style={{
           position: "absolute",
           inset: 0,
           borderRadius: 9999,
-          background:
-            "radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.05) 0%, transparent 60%)",
+          background: "radial-gradient(ellipse at 30% 20%, rgba(0,0,0,0.02) 0%, transparent 60%)",
           pointerEvents: "none",
         }}
       />
@@ -183,9 +205,7 @@ function Capsule({ children, phase }: { children: React.ReactNode; phase: string
   );
 }
 
-/* ─────────────────────────────────────────────
-   AMBIENT GLOW
-───────────────────────────────────────────── */
+/* ─── AMBIENT GLOW ─── */
 function AmbientGlow({ phase }: { phase: string }) {
   return (
     <motion.div
@@ -194,123 +214,96 @@ function AmbientGlow({ phase }: { phase: string }) {
         width: "clamp(400px, 70vw, 800px)",
         height: "clamp(400px, 70vw, 800px)",
         borderRadius: "50%",
-        background:
-          "radial-gradient(ellipse, rgba(255,255,255,0.035) 0%, transparent 65%)",
-        filter: "blur(40px)",
+        background: "radial-gradient(ellipse, rgba(0,0,0,0.025) 0%, transparent 65%)",
+        filter: "blur(60px)",
       }}
       animate={{
         scale: phase === "dissolve" ? 2 : [1, 1.08, 1],
-        opacity: phase === "dissolve" ? 0 : [0.6, 1, 0.6],
+        opacity: phase === "dissolve" ? 0 : [0.5, 1, 0.5],
       }}
       transition={
         phase === "dissolve"
-          ? { duration: 1.2, ease: "easeInOut" }
+          ? { duration: 1.0, ease: "easeInOut" }
           : { duration: 3.6, repeat: Infinity, ease: "easeInOut" }
       }
     />
   );
 }
 
-/* ─────────────────────────────────────────────
-   MAIN LOADING SCREEN
-───────────────────────────────────────────── */
+/* ─── MAIN ─── */
 export default function LoadingScreen({ onComplete }: { onComplete: () => void }) {
-  // phases: "loading" | "glitch" | "name" | "dissolve" | "white" | "done"
   const [phase, setPhase] = useState("loading");
   const [pct, setPct] = useState(0);
   const [showShine, setShowShine] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const whiteRef = useRef<HTMLDivElement>(null);
-  const masterTL = useRef<gsap.core.Timeline | null>(null);
 
   const NAME = "HIMAGIRI SIDDESH";
   const nameChars = NAME.split("").map((ch, i) => ({ ch, i }));
 
-  /* ── percentage counter ── */
+  /* percentage counter */
   useEffect(() => {
     if (phase !== "loading") return;
     const start = performance.now();
-    const totalMs = 4200;
+    const totalMs = 3800;
     let raf: number;
     const tick = (now: number) => {
       const elapsed = now - start;
       const progress = Math.min(elapsed / totalMs, 1);
-      // ease-in-out cubic
       const eased =
         progress < 0.5
           ? 4 * progress * progress * progress
           : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-      const newPct = Math.round(eased * 100);
-      setPct(newPct);
+      setPct(Math.round(eased * 100));
       if (progress < 1) {
         raf = requestAnimationFrame(tick);
       } else {
-        // loading done → brief pause then glitch
-        setTimeout(() => setPhase("glitch"), 320);
+        setTimeout(() => setPhase("glitch"), 280);
       }
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [phase]);
 
-  /* ── after glitch → name → dissolve → white → done ── */
   useEffect(() => {
     if (phase !== "glitch") return;
-    // glitch duration ~ 800 ms (longest char delay 700 + 18*40=720)
-    const nameTimer = setTimeout(() => {
-      setPhase("name");
-      setShowShine(true);
-    }, 900);
-    return () => clearTimeout(nameTimer);
+    const t = setTimeout(() => { setPhase("name"); setShowShine(true); }, 900);
+    return () => clearTimeout(t);
   }, [phase]);
 
   useEffect(() => {
     if (phase !== "name") return;
-    const dissolveTimer = setTimeout(() => setPhase("dissolve"), 2200);
-    return () => clearTimeout(dissolveTimer);
+    const t = setTimeout(() => setPhase("dissolve"), 2000);
+    return () => clearTimeout(t);
   }, [phase]);
 
-  /* ── GSAP white flash ── */
+  /* after dissolve animation completes, call onComplete */
   useEffect(() => {
     if (phase !== "dissolve") return;
-    // after capsule dissolve animation (1.2s), trigger white flash
-    const gsapTimer = setTimeout(() => {
-      if (!whiteRef.current) return;
-      masterTL.current = gsap.timeline({
-        onComplete: () => {
-          setPhase("done");
-          onComplete?.();
-        },
-      });
-      masterTL.current
-        .set(whiteRef.current, { display: "block", opacity: 0 })
-        .to(whiteRef.current, {
-          opacity: 1,
-          duration: 0.9,
-          ease: "power2.inOut",
-        })
-        .to(whiteRef.current, {
-          opacity: 1,
-          duration: 1.0, // hold white
-        })
-        .to(whiteRef.current, {
-          opacity: 0,
-          duration: 0.5,
-          ease: "power2.inOut",
-        });
-    }, 1000);
-    return () => clearTimeout(gsapTimer);
+    const t = setTimeout(() => {
+      setPhase("done");
+      onComplete?.();
+    }, 1200);
+    return () => clearTimeout(t);
   }, [phase, onComplete]);
 
   if (phase === "done") return null;
 
+  const watermarkRows = [
+    { top: "4%", direction: "left" as const, speed: 28 },
+    { top: "16%", direction: "right" as const, speed: 34 },
+    { top: "28%", direction: "left" as const, speed: 22 },
+    { top: "40%", direction: "right" as const, speed: 30 },
+    { top: "52%", direction: "left" as const, speed: 26 },
+    { top: "64%", direction: "right" as const, speed: 32 },
+    { top: "76%", direction: "left" as const, speed: 24 },
+    { top: "88%", direction: "right" as const, speed: 36 },
+  ];
+
   return (
     <div
-      ref={containerRef}
       style={{
         position: "fixed",
         inset: 0,
-        background: "#000000",
+        background: "#ffffff",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -319,29 +312,21 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
         fontFamily: "'Geist', -apple-system, 'Helvetica Neue', sans-serif",
       }}
     >
-      {/* GSAP white overlay */}
-      <div
-        ref={whiteRef}
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "#ffffff",
-          display: "none",
-          opacity: 0,
-          zIndex: 100,
-          pointerEvents: "none",
-        }}
-      />
+      {/* Moving watermark rows */}
+      {watermarkRows.map((row, i) => (
+        <WatermarkRow key={i} top={row.top} direction={row.direction} speed={row.speed} />
+      ))}
 
-      {/* Subtle grid texture */}
+      {/* Subtle grid */}
       <div
         style={{
           position: "absolute",
           inset: 0,
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px)",
+            "linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px)",
           backgroundSize: "60px 60px",
           pointerEvents: "none",
+          zIndex: 1,
         }}
       />
 
@@ -350,6 +335,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
         {(phase === "loading" || phase === "glitch" || phase === "name") && (
           <motion.div
             className="absolute inset-0 pointer-events-none"
+            style={{ zIndex: 2 }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -362,132 +348,119 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
         )}
       </AnimatePresence>
 
-      {/* Ambient glow behind capsule */}
-      <AmbientGlow phase={phase} />
+      {/* Ambient glow */}
+      <div style={{ position: "relative", zIndex: 3 }}>
+        <AmbientGlow phase={phase} />
+      </div>
 
-      {/* CAPSULE */}
-      <Capsule phase={phase === "dissolve" ? "dissolve" : "idle"}>
-        {/* Loading phase */}
-        <AnimatePresence mode="wait">
-          {phase === "loading" && (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.4 }}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "10px",
-                width: "100%",
-                padding: "0 40px",
-              }}
-            >
-              <div
+      {/* Capsule */}
+      <div style={{ position: "relative", zIndex: 4 }}>
+        <Capsule phase={phase === "dissolve" ? "dissolve" : "idle"}>
+          <AnimatePresence mode="wait">
+            {phase === "loading" && (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.4 }}
                 style={{
                   display: "flex",
-                  alignItems: "baseline",
-                  gap: "12px",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "10px",
+                  width: "100%",
+                  padding: "0 40px",
                 }}
               >
-                <span
+                <div style={{ display: "flex", alignItems: "baseline", gap: "12px" }}>
+                  <span
+                    style={{
+                      fontSize: "clamp(13px, 1.6vw, 17px)",
+                      fontWeight: 300,
+                      letterSpacing: "0.32em",
+                      color: "rgba(0,0,0,0.4)",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Loading
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "clamp(13px, 1.6vw, 17px)",
+                      fontWeight: 300,
+                      letterSpacing: "0.12em",
+                      color: "rgba(0,0,0,0.8)",
+                      minWidth: "3.5ch",
+                      textAlign: "right",
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    {pct}%
+                  </span>
+                </div>
+                <div
                   style={{
-                    fontSize: "clamp(13px, 1.6vw, 17px)",
-                    fontWeight: 300,
-                    letterSpacing: "0.32em",
-                    color: "rgba(255,255,255,0.55)",
-                    textTransform: "uppercase",
+                    width: "clamp(160px, 28vw, 320px)",
+                    height: 1,
+                    background: "rgba(0,0,0,0.10)",
+                    borderRadius: 1,
+                    overflow: "hidden",
                   }}
                 >
-                  Loading
-                </span>
-                <motion.span
+                  <motion.div
+                    style={{
+                      height: "100%",
+                      background: "linear-gradient(90deg, rgba(0,0,0,0.2), rgba(0,0,0,0.7))",
+                    }}
+                    animate={{ width: `${pct}%` }}
+                    transition={{ ease: "linear", duration: 0.08 }}
+                  />
+                </div>
+              </motion.div>
+            )}
+
+            {(phase === "glitch" || phase === "name") && (
+              <motion.div
+                key="name"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+                style={{
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "100%",
+                  padding: "0 32px",
+                }}
+              >
+                <ShineEffect active={showShine} />
+                <div
                   style={{
-                    fontSize: "clamp(13px, 1.6vw, 17px)",
-                    fontWeight: 300,
-                    letterSpacing: "0.12em",
-                    color: "rgba(255,255,255,0.9)",
-                    minWidth: "3.5ch",
-                    textAlign: "right",
-                    fontVariantNumeric: "tabular-nums",
+                    fontSize: "clamp(15px, 2.2vw, 26px)",
+                    fontWeight: 200,
+                    letterSpacing: "0.20em",
+                    color: "#000000",
+                    userSelect: "none",
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  {pct}%
-                </motion.span>
-              </div>
+                  {nameChars.map(({ ch, i }) =>
+                    ch === " " ? (
+                      <span key={i} style={{ display: "inline-block", width: "0.6em" }} />
+                    ) : (
+                      <GlitchChar key={i} finalChar={ch} delay={i * 38} />
+                    )
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Capsule>
+      </div>
 
-              {/* progress track inside capsule */}
-              <div
-                style={{
-                  width: "clamp(160px, 28vw, 320px)",
-                  height: 1,
-                  background: "rgba(255,255,255,0.10)",
-                  borderRadius: 1,
-                  overflow: "hidden",
-                }}
-              >
-                <motion.div
-                  style={{
-                    height: "100%",
-                    background:
-                      "linear-gradient(90deg, rgba(255,255,255,0.35), rgba(255,255,255,0.85))",
-                    boxShadow: "0 0 6px rgba(255,255,255,0.45)",
-                  }}
-                  animate={{ width: `${pct}%` }}
-                  transition={{ ease: "linear", duration: 0.08 }}
-                />
-              </div>
-            </motion.div>
-          )}
-
-          {/* Glitch → name phase */}
-          {(phase === "glitch" || phase === "name") && (
-            <motion.div
-              key="name"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
-              style={{
-                position: "relative",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-                padding: "0 32px",
-              }}
-            >
-              <ShineEffect active={showShine} />
-              <div
-                style={{
-                  fontSize: "clamp(15px, 2.2vw, 26px)",
-                  fontWeight: 200,
-                  letterSpacing: "0.20em",
-                  color: "#ffffff",
-                  userSelect: "none",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {nameChars.map(({ ch, i }) =>
-                  ch === " " ? (
-                    <span key={i} style={{ display: "inline-block", width: "0.6em" }} />
-                  ) : (
-                    <GlitchChar
-                      key={i}
-                      finalChar={ch}
-                      delay={i * 38}
-                      isSpace={false}
-                    />
-                  )
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </Capsule>
-
-      {/* Bottom micro label */}
+      {/* Bottom label */}
       <AnimatePresence>
         {phase === "loading" && (
           <motion.div
@@ -502,12 +475,13 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
               transform: "translateX(-50%)",
               fontSize: "10px",
               letterSpacing: "0.42em",
-              color: "rgba(255,255,255,0.2)",
+              color: "rgba(0,0,0,0.22)",
               textTransform: "uppercase",
               whiteSpace: "nowrap",
+              zIndex: 5,
             }}
           >
-            Portfolio · 2025
+            Portfolio · 2026
           </motion.div>
         )}
       </AnimatePresence>
