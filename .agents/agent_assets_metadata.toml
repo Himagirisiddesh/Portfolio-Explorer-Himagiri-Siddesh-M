@@ -6,3 +6,9 @@ id = "xmojddK89nth655MpRQD9"
 uri = "file://himagiri-portfolio.tar.gz"
 type = "unspecified"
 title = "Himagiri Portfolio — Full Project"
+
+[[outputs]]
+id = "_-UwrO8pBT3tQnAgi7Eqc"
+uri = "file://himagiri-portfolio.zip"
+type = "unspecified"
+title = "Himagiri Portfolio — Source Code (.zip)"
