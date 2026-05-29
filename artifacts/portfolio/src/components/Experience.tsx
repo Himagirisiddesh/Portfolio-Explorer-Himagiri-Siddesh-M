@@ -42,7 +42,7 @@ export function Experience() {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
 
   return (
-    <section id="experience" className="py-32 relative bg-white/[0.02]">
+    <section id="experience" className="py-32 relative">
       <div className="container mx-auto px-6">
         <motion.div
           ref={ref}

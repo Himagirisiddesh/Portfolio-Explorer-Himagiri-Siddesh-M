@@ -32,7 +32,7 @@ export function Skills() {
   ];
 
   return (
-    <section id="skills" className="py-32 relative bg-white/[0.02]">
+    <section id="skills" className="py-32 relative">
       <div className="container mx-auto px-6">
         <motion.div
           ref={ref}
