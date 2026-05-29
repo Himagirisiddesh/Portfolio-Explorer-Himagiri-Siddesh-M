@@ -10,15 +10,15 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const scrollTo = (id: string) => {
+  const scrollTo = (id: string) =>
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-  };
 
   const navItems = [
     { name: "About", id: "hero" },
     { name: "Education", id: "education" },
     { name: "Skills", id: "skills" },
     { name: "Projects", id: "projects" },
+    { name: "Experience", id: "experience" },
     { name: "Achievements", id: "achievements" },
     { name: "Contact", id: "contact" },
   ];
@@ -42,12 +42,12 @@ export function Navbar() {
           HS.
         </button>
 
-        <div className="hidden md:flex gap-8">
+        <div className="hidden lg:flex gap-6">
           {navItems.map((item) => (
             <button
               key={item.name}
               onClick={() => scrollTo(item.id)}
-              className="text-white/50 hover:text-white text-[10px] uppercase tracking-widest font-mono transition-colors"
+              className="text-white/45 hover:text-white text-[10px] uppercase tracking-widest font-mono transition-colors"
             >
               {item.name}
             </button>
@@ -56,7 +56,7 @@ export function Navbar() {
 
         <a
           href="mailto:himagirisiddesh@gmail.com"
-          className="hidden md:block text-[10px] font-mono tracking-widest uppercase text-white/40 hover:text-white border border-white/15 hover:border-white/40 px-4 py-2 transition-all"
+          className="hidden md:block text-[10px] font-mono tracking-widest uppercase text-white/40 hover:text-white border border-white/15 hover:border-white/45 px-4 py-2 transition-all"
         >
           Hire Me
         </a>
