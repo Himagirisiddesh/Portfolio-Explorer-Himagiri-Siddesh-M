@@ -1,609 +1,497 @@
-import { useRef } from "react";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useInView,
-  useSpring,
-} from "framer-motion";
+import { useRef, useEffect, useState, useCallback } from "react";
+import { motion, useScroll, useTransform, useSpring, useInView } from "framer-motion";
 
-/* ─── Data ─────────────────────────────────────────────── */
-const milestones = [
+/* ─── Data ───────────────────────────────────────────────── */
+const MILESTONES = [
   {
-    num: "01",
-    year: "2025 – 2027",
-    short: "MCA",
-    degree: "Master of Computer Applications",
-    institution: "RNS Institute of Technology, Bengaluru",
-    score: "CGPA: 9.39",
-    side: "right" as const,
-    dotX: 620,
-    dotY: 280,
-    color: "#22d3ee",
+    num: "01", side: "left" as const,
+    short: "SSLC", degree: "Secondary School Leaving Certificate",
+    institution: "", year: "2019 – 2020", score: "73.2%", isCurrent: false, isFuture: false,
   },
   {
-    num: "02",
-    year: "2022 – 2025",
-    short: "BCA",
-    degree: "Bachelor of Computer Applications",
-    institution: "KLE Society's Degree College",
-    score: "CGPA: 8.4",
-    side: "left" as const,
-    dotX: 380,
-    dotY: 560,
-    color: "#38bdf8",
+    num: "02", side: "right" as const,
+    short: "PUC", degree: "Pre-University Course",
+    institution: "", year: "2020 – 2022", score: "87%", isCurrent: false, isFuture: false,
   },
   {
-    num: "03",
-    year: "2020 – 2022",
-    short: "PUC",
-    degree: "Pre-University Course",
-    institution: "",
-    score: "87%",
-    side: "right" as const,
-    dotX: 620,
-    dotY: 840,
-    color: "#67e8f9",
+    num: "03", side: "left" as const,
+    short: "BCA", degree: "Bachelor of Computer Applications",
+    institution: "KLE Society's Degree College", year: "2022 – 2025", score: "CGPA: 8.4",
+    isCurrent: false, isFuture: false,
   },
   {
-    num: "04",
-    year: "2019 – 2020",
-    short: "SSLC",
-    degree: "Secondary School Leaving Certificate",
-    institution: "",
-    score: "73.2%",
-    side: "left" as const,
-    dotX: 380,
-    dotY: 1120,
-    color: "#a5f3fc",
+    num: "04", side: "right" as const,
+    short: "MCA", degree: "Master of Computer Applications",
+    institution: "RNS Institute of Technology", year: "2025 – 2027", score: "CGPA: 9.39",
+    isCurrent: true, isFuture: false,
+  },
+  {
+    num: "05", side: "left" as const,
+    short: "DevOps Engineer", degree: "Building scalable cloud infrastructure and automation systems.",
+    institution: "", year: "Future Goal", score: "",
+    isCurrent: false, isFuture: true,
   },
 ];
 
-/* SVG viewBox dimensions */
-const VW = 1000;
-const VH = 1400;
+/* ─── SVG layout constants (viewBox = 0 0 680 1100) ─────── */
+const VW = 680;
+const VH = 1100;
+const PILL_W = 510;           // 75% of 680
+const PILL_H = 120;
+const PILL_RX = 60;           // half-height cap
+const GAP = 80;               // vertical gap between pills
 
-/* Winding S-curve path through all 4 dots */
-const ROAD_PATH = `
-  M 500 30
-  C 500 80,  600 180, 620 280
-  C 640 380, 540 450, 500 470
-  C 460 490, 380 520, 380 560
-  C 380 600, 460 700, 500 720
-  C 540 740, 600 790, 620 840
-  C 640 890, 560 960, 500 980
-  C 440 1000, 380 1055, 380 1120
-  C 380 1185, 500 1340, 500 1400
-`.trim();
+/* Pill vertical centers */
+const CY = [0, 1, 2, 3, 4].map((i) => PILL_RX + i * (PILL_H + GAP));
+// = [60, 260, 460, 660, 860]
 
-/* ─── Floating particle ─────────────────────────────────── */
-function Particle({ x, y, delay }: { x: number; y: number; delay: number }) {
+/* Left pill: x=0..510, Right pill: x=170..680 */
+const LEFT_CAP_L  = PILL_RX;                     // 60
+const LEFT_CAP_R  = PILL_W - PILL_RX;            // 450
+const RIGHT_CAP_L = (VW - PILL_W) + PILL_RX;    // 230
+const RIGHT_CAP_R = VW - PILL_RX;               // 620
+
+/*
+  Center-line path the dot travels:
+  - Pill 1 (left, cy=60):  entry from top → left cap → right cap
+  - Right hairpin          → Pill 2 right cap (cy=260)
+  - Pill 2 (right, cy=260): right cap → left cap
+  - Left hairpin           → Pill 3 left cap (cy=460)
+  - ... repeat
+  - Exit from Pill 5 right cap to bottom
+*/
+const DOT_PATH = [
+  `M ${VW / 2} -10`,
+  `C ${VW / 2} 25, ${LEFT_CAP_L} 25, ${LEFT_CAP_L} ${CY[0]}`,
+  `L ${LEFT_CAP_R} ${CY[0]}`,
+  `C ${VW} ${CY[0]}, ${VW} ${CY[1]}, ${RIGHT_CAP_R} ${CY[1]}`,
+  `L ${RIGHT_CAP_L} ${CY[1]}`,
+  `C 0 ${CY[1]}, 0 ${CY[2]}, ${LEFT_CAP_L} ${CY[2]}`,
+  `L ${LEFT_CAP_R} ${CY[2]}`,
+  `C ${VW} ${CY[2]}, ${VW} ${CY[3]}, ${RIGHT_CAP_R} ${CY[3]}`,
+  `L ${RIGHT_CAP_L} ${CY[3]}`,
+  `C 0 ${CY[3]}, 0 ${CY[4]}, ${LEFT_CAP_L} ${CY[4]}`,
+  `L ${LEFT_CAP_R} ${CY[4]}`,
+  `C ${PILL_W} ${CY[4]}, ${VW / 2} ${CY[4] + 60}, ${VW / 2} ${VH - 10}`,
+].join(" ");
+
+/* Pill rects in SVG space */
+const PILL_RECTS = MILESTONES.map((m, i) => ({
+  x: m.side === "left" ? 0 : VW - PILL_W,
+  y: i * (PILL_H + GAP),
+  w: PILL_W,
+  h: PILL_H,
+  rx: PILL_RX,
+}));
+
+/* ─── Single pill card ───────────────────────────────────── */
+function PillCard({
+  m, rect, isActive, index,
+}: {
+  m: (typeof MILESTONES)[0];
+  rect: { x: number; y: number; w: number; h: number };
+  isActive: boolean;
+  index: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-60px 0px" });
+  const isLeft = m.side === "left";
+
   return (
     <motion.div
-      aria-hidden
+      ref={ref}
+      initial={{ opacity: 0, x: isLeft ? -30 : 30 }}
+      animate={inView ? { opacity: 1, x: 0 } : {}}
+      transition={{ duration: 0.7, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
       style={{
         position: "absolute",
-        left: `${x}%`,
-        top: `${y}%`,
-        width: 2,
-        height: 2,
-        borderRadius: "50%",
-        background: "rgba(34,211,238,0.55)",
-        pointerEvents: "none",
+        left: `${(rect.x / VW) * 100}%`,
+        top: `${(rect.y / VH) * 100}%`,
+        width: `${(rect.w / VW) * 100}%`,
+        height: `${(rect.h / VH) * 100}%`,
+        borderRadius: 999,
+        border: `1px solid ${isActive
+          ? m.isCurrent
+            ? "rgba(255,255,255,0.32)"
+            : "rgba(255,255,255,0.22)"
+          : "rgba(255,255,255,0.10)"}`,
+        background: isActive
+          ? m.isCurrent
+            ? "rgba(255,255,255,0.05)"
+            : "rgba(255,255,255,0.03)"
+          : "rgba(255,255,255,0.015)",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+        transition: "border-color 0.6s, background 0.6s",
+        display: "flex",
+        alignItems: "center",
+        padding: "0 2.5%",
+        gap: "3%",
+        overflow: "hidden",
+        boxSizing: "border-box",
+        boxShadow: isActive && m.isCurrent
+          ? "0 0 40px rgba(255,255,255,0.04)"
+          : "none",
       }}
-      animate={{
-        y: [0, -30, 0],
-        opacity: [0.2, 0.8, 0.2],
-        scale: [1, 1.5, 1],
-      }}
-      transition={{
-        duration: 4 + delay,
-        delay,
-        repeat: Infinity,
-        ease: "easeInOut",
-      }}
-    />
-  );
-}
-
-/* ─── Mobile card (hooks-safe, extracted from map) ──────── */
-function MobileCard({ m, index }: { m: (typeof milestones)[0]; index: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true });
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, x: -30 }}
-      animate={inView ? { opacity: 1, x: 0 } : {}}
-      transition={{ duration: 0.7, delay: index * 0.1 }}
-      style={{ paddingLeft: 48, position: "relative" }}
     >
+      {/* Number badge */}
       <div
         style={{
-          position: "absolute",
-          left: 14,
-          top: 22,
-          width: 12,
-          height: 12,
+          flexShrink: 0,
+          width: "12%",
+          aspectRatio: "1",
           borderRadius: "50%",
-          background: m.color,
-          boxShadow: `0 0 12px ${m.color}`,
-        }}
-      />
-      <div
-        style={{
-          background: "rgba(6,182,212,0.04)",
-          border: "1px solid rgba(34,211,238,0.2)",
-          borderRadius: 14,
-          padding: "18px 20px",
-          backdropFilter: "blur(12px)",
-        }}
-      >
-        <div style={{ fontFamily: "monospace", fontSize: 10, color: m.color, opacity: 0.7, letterSpacing: "0.3em", marginBottom: 4 }}>{m.num}</div>
-        <div style={{ fontSize: 26, fontWeight: 700, color: "#fff", letterSpacing: "-0.03em", marginBottom: 2 }}>{m.short}</div>
-        <div style={{ fontFamily: "monospace", fontSize: 10, color: "rgba(255,255,255,0.3)", letterSpacing: "0.2em", marginBottom: 8 }}>{m.year}</div>
-        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", marginBottom: m.institution ? 4 : 8 }}>{m.degree}</div>
-        {m.institution && (
-          <div style={{ fontFamily: "monospace", fontSize: 10, color: "rgba(255,255,255,0.28)", marginBottom: 8 }}>{m.institution}</div>
-        )}
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(34,211,238,0.1)", border: "1px solid rgba(34,211,238,0.2)", borderRadius: 99, padding: "2px 10px", fontSize: 10, fontFamily: "monospace", color: m.color }}>
-          <span style={{ width: 4, height: 4, borderRadius: "50%", background: m.color, display: "inline-block" }} />
-          {m.score}
-        </span>
-      </div>
-    </motion.div>
-  );
-}
-
-/* ─── Desktop milestone card ─────────────────────────────── */
-function Card({ m }: { m: (typeof milestones)[0] }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-80px 0px" });
-
-  const topPct = `${(m.dotY / VH) * 100}%`;
-  const isRight = m.side === "right";
-
-  /* Horizontal connector line width (from dot to card edge) */
-  const connectorPct = "3%";
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, x: isRight ? 60 : -60 }}
-      animate={inView ? { opacity: 1, x: 0 } : {}}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className="absolute"
-      style={{
-        top: topPct,
-        ...(isRight
-          ? { left: `${(m.dotX / VW) * 100 + 4}%`, maxWidth: "33%" }
-          : { right: `${((VW - m.dotX) / VW) * 100 + 4}%`, maxWidth: "33%" }),
-        transform: "translateY(-50%)",
-        zIndex: 10,
-      }}
-    >
-      {/* Connector line */}
-      <motion.div
-        initial={{ scaleX: 0 }}
-        animate={inView ? { scaleX: 1 } : {}}
-        transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
-        style={{
-          position: "absolute",
-          top: "50%",
-          width: 32,
-          height: 1,
-          background: `linear-gradient(${isRight ? "90deg" : "270deg"}, ${m.color}, transparent)`,
-          transformOrigin: isRight ? "left" : "right",
-          ...(isRight ? { right: "100%" } : { left: "100%" }),
-        }}
-      />
-
-      {/* Card */}
-      <motion.div
-        whileHover={{ scale: 1.025, y: -4 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        style={{
-          background: "rgba(6,182,212,0.04)",
-          border: `1px solid rgba(34,211,238,0.28)`,
-          borderRadius: 16,
-          padding: "20px 24px",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
-          boxShadow: `0 0 24px rgba(34,211,238,0.08), 0 0 0 1px rgba(34,211,238,0.06), inset 0 1px 0 rgba(255,255,255,0.06)`,
-          cursor: "default",
+          border: `1px solid ${isActive ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.1)"}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "monospace",
+          fontSize: "min(1.8vw, 13px)",
+          color: isActive ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.3)",
+          transition: "all 0.6s",
           position: "relative",
-          overflow: "hidden",
         }}
       >
-        {/* Hover shimmer */}
-        <motion.div
-          aria-hidden
-          initial={{ x: "-100%", opacity: 0 }}
-          whileHover={{ x: "100%", opacity: 1 }}
-          transition={{ duration: 0.6 }}
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "linear-gradient(90deg, transparent, rgba(34,211,238,0.04), transparent)",
-            pointerEvents: "none",
-          }}
-        />
+        {m.num}
+        {/* Current pulsing ring */}
+        {m.isCurrent && isActive && (
+          <motion.div
+            style={{
+              position: "absolute",
+              inset: -4,
+              borderRadius: "50%",
+              border: "1px solid rgba(255,255,255,0.35)",
+            }}
+            animate={{ scale: [1, 1.35, 1], opacity: [0.5, 0, 0.5] }}
+            transition={{ duration: 2.2, repeat: Infinity }}
+          />
+        )}
+      </div>
 
-        {/* Number */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 0.4, duration: 0.5 }}
-          style={{
-            fontFamily: "monospace",
-            fontSize: 11,
-            letterSpacing: "0.3em",
-            color: m.color,
-            opacity: 0.7,
-            marginBottom: 8,
-          }}
-        >
-          {m.num}
-        </motion.div>
+      {/* Content */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {/* Year + badges row */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "1.5%" }}>
+          <span
+            style={{
+              fontFamily: "monospace",
+              fontSize: "min(1.5vw, 10px)",
+              letterSpacing: "0.25em",
+              color: "rgba(255,255,255,0.3)",
+              textTransform: "uppercase",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {m.year}
+          </span>
+          {m.isCurrent && (
+            <span
+              style={{
+                fontFamily: "monospace",
+                fontSize: "min(1.2vw, 9px)",
+                letterSpacing: "0.2em",
+                color: "rgba(255,255,255,0.7)",
+                border: "1px solid rgba(255,255,255,0.25)",
+                padding: "1px 6px",
+                borderRadius: 99,
+                textTransform: "uppercase",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Current
+            </span>
+          )}
+          {m.isFuture && (
+            <span
+              style={{
+                fontFamily: "monospace",
+                fontSize: "min(1.2vw, 9px)",
+                letterSpacing: "0.2em",
+                color: "rgba(255,255,255,0.4)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                padding: "1px 6px",
+                borderRadius: 99,
+                textTransform: "uppercase",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Future
+            </span>
+          )}
+        </div>
 
         {/* Short name */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 0.45, duration: 0.5 }}
+        <div
           style={{
-            fontSize: "clamp(22px, 2.5vw, 34px)",
-            fontWeight: 700,
-            color: "#ffffff",
-            letterSpacing: "-0.03em",
+            fontSize: "min(3vw, 20px)",
+            fontWeight: 600,
+            color: isActive ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.35)",
+            letterSpacing: "-0.02em",
             lineHeight: 1,
-            marginBottom: 6,
+            marginBottom: "1.5%",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            transition: "color 0.6s",
           }}
         >
           {m.short}
-        </motion.div>
+        </div>
 
-        {/* Year */}
-        <motion.div
-          initial={{ opacity: 0, y: 6 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 0.5, duration: 0.5 }}
-          style={{
-            fontFamily: "monospace",
-            fontSize: 10,
-            letterSpacing: "0.25em",
-            color: "rgba(255,255,255,0.35)",
-            marginBottom: 10,
-          }}
-        >
-          {m.year}
-        </motion.div>
-
-        {/* Divider */}
+        {/* Institution or degree */}
         <div
           style={{
-            width: 28,
-            height: 1,
-            background: `rgba(34,211,238,0.35)`,
-            marginBottom: 10,
-          }}
-        />
-
-        {/* Full degree name */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.55, duration: 0.5 }}
-          style={{
-            fontSize: "clamp(10px, 1.1vw, 13px)",
-            color: "rgba(255,255,255,0.55)",
-            fontWeight: 400,
-            lineHeight: 1.5,
-            marginBottom: m.institution ? 4 : 8,
+            fontSize: "min(1.6vw, 11px)",
+            color: "rgba(255,255,255,0.35)",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
           }}
         >
-          {m.degree}
-        </motion.div>
+          {m.institution || m.degree}
+        </div>
+      </div>
 
-        {/* Institution */}
-        {m.institution && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={inView ? { opacity: 1 } : {}}
-            transition={{ delay: 0.6, duration: 0.5 }}
-            style={{
-              fontSize: "clamp(9px, 0.9vw, 11px)",
-              color: "rgba(255,255,255,0.3)",
-              fontFamily: "monospace",
-              marginBottom: 8,
-              lineHeight: 1.4,
-            }}
-          >
-            {m.institution}
-          </motion.div>
-        )}
-
-        {/* Score pill */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={inView ? { opacity: 1, scale: 1 } : {}}
-          transition={{ delay: 0.65, duration: 0.45 }}
+      {/* Score */}
+      {m.score && (
+        <div
           style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            background: `rgba(34,211,238,0.1)`,
-            border: `1px solid rgba(34,211,238,0.25)`,
-            borderRadius: 99,
-            padding: "3px 10px",
-            fontSize: 10,
+            flexShrink: 0,
             fontFamily: "monospace",
-            color: m.color,
-            letterSpacing: "0.1em",
+            fontSize: "min(1.6vw, 11px)",
+            color: isActive ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.2)",
+            letterSpacing: "0.05em",
+            textAlign: "right",
+            transition: "color 0.6s",
+            whiteSpace: "nowrap",
+            paddingRight: "2%",
           }}
         >
-          <span
-            style={{
-              width: 5,
-              height: 5,
-              borderRadius: "50%",
-              background: m.color,
-              display: "inline-block",
-              boxShadow: `0 0 6px ${m.color}`,
-            }}
-          />
           {m.score}
-        </motion.div>
-      </motion.div>
+        </div>
+      )}
     </motion.div>
   );
 }
 
-/* ─── Main component ────────────────────────────────────── */
+/* ─── Main component ─────────────────────────────────────── */
 export function Education() {
   const sectionRef = useRef<HTMLElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const pathRef = useRef<SVGPathElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  /* Scroll-driven path draw */
+  const [dotPos, setDotPos] = useState({ x: VW / 2, y: -10 });
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const [pathProgress, setPathProgress] = useState(0);
+
+  /* Milestone "trigger" lengths along the path (0-1) */
+  const TRIGGER_FRACTIONS = [0.12, 0.30, 0.48, 0.66, 0.84];
+
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start 85%", "end 30%"],
+    offset: ["start 85%", "end 20%"],
   });
-  const rawPath = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  const pathLength = useSpring(rawPath, { stiffness: 60, damping: 20 });
 
-  /* Glow opacity pulses as path draws */
-  const glowOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.3, 1, 0.8]);
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 80, damping: 25, restDelta: 0.001 });
 
-  /* Particles */
-  const particles = [
-    { x: 8, y: 15, delay: 0 }, { x: 90, y: 20, delay: 1.2 },
-    { x: 25, y: 45, delay: 2 }, { x: 75, y: 55, delay: 0.7 },
-    { x: 12, y: 70, delay: 1.8 }, { x: 88, y: 75, delay: 3 },
-    { x: 50, y: 90, delay: 0.5 }, { x: 35, y: 30, delay: 2.5 },
-    { x: 65, y: 85, delay: 1.5 }, { x: 5, y: 50, delay: 0.3 },
-    { x: 95, y: 40, delay: 2.8 }, { x: 45, y: 10, delay: 1.1 },
-  ];
+  useEffect(() => {
+    return smoothProgress.on("change", (p) => {
+      setPathProgress(p);
+
+      const path = pathRef.current;
+      if (!path) return;
+
+      const totalLen = path.getTotalLength();
+      const pt = path.getPointAtLength(Math.min(p, 0.999) * totalLen);
+
+      // Convert SVG coords to %-based (for the positioned overlay)
+      setDotPos({ x: pt.x, y: pt.y });
+
+      // Activate milestones as dot passes each trigger fraction
+      let active = -1;
+      for (let i = 0; i < TRIGGER_FRACTIONS.length; i++) {
+        if (p >= TRIGGER_FRACTIONS[i]) active = i;
+      }
+      setActiveIndex(active);
+    });
+  }, [smoothProgress]);
+
+  /* Scroll-driven path draw */
+  const pathLength = useTransform(smoothProgress, [0, 1], [0, 1]);
 
   return (
     <section
       id="education"
       ref={sectionRef}
-      style={{
-        background: "#0a0f1e",
-        position: "relative",
-        overflow: "hidden",
-        paddingTop: 120,
-        paddingBottom: 120,
-      }}
+      style={{ position: "relative", overflow: "hidden", paddingTop: 128, paddingBottom: 128 }}
     >
-      {/* Top bleed from global bg */}
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 80,
-          background: "linear-gradient(to bottom, #050505, transparent)",
-          zIndex: 1,
-          pointerEvents: "none",
-        }}
-      />
-      {/* Bottom bleed */}
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 80,
-          background: "linear-gradient(to top, #050505, transparent)",
-          zIndex: 1,
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* Ambient blue background glow */}
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "radial-gradient(ellipse at 50% 30%, rgba(6,182,212,0.08) 0%, transparent 65%), radial-gradient(ellipse at 20% 70%, rgba(59,130,246,0.06) 0%, transparent 50%)",
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* Floating particles */}
-      {particles.map((p, i) => (
-        <Particle key={i} {...p} />
-      ))}
-
-      {/* ── Section heading ── */}
-      <div style={{ position: "relative", zIndex: 5, textAlign: "center", marginBottom: 80 }}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-        >
-          <div
-            style={{
-              fontFamily: "monospace",
-              fontSize: 11,
-              letterSpacing: "0.5em",
-              color: "#22d3ee",
-              opacity: 0.65,
-              marginBottom: 16,
-              textTransform: "uppercase",
-            }}
-          >
-            Academic Journey
-          </div>
-          <h2
-            style={{
-              fontSize: "clamp(48px, 8vw, 110px)",
-              fontWeight: 800,
-              letterSpacing: "-0.04em",
-              lineHeight: 0.92,
-              color: "#ffffff",
-              margin: 0,
-            }}
-          >
-            Education
-          </h2>
-          <div
-            style={{
-              width: 48,
-              height: 2,
-              background: "linear-gradient(90deg, transparent, #22d3ee, transparent)",
-              margin: "20px auto 0",
-              borderRadius: 1,
-            }}
-          />
-        </motion.div>
-      </div>
-
-      {/* ── Timeline ── */}
-      <div
-        className="container mx-auto"
-        style={{ position: "relative", padding: "0 24px" }}
+      {/* ── Heading ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7 }}
+        style={{ textAlign: "center", marginBottom: 72 }}
       >
-        {/* Desktop winding road */}
-        <div
-          className="hidden md:block"
-          style={{ position: "relative", height: VH, maxWidth: 1100, margin: "0 auto" }}
+        <p
+          style={{
+            fontFamily: "monospace",
+            fontSize: 11,
+            letterSpacing: "0.45em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.28)",
+            marginBottom: 14,
+          }}
         >
-          {/* SVG road */}
+          Academic Journey
+        </p>
+        <h2
+          style={{
+            fontSize: "clamp(42px, 7vw, 96px)",
+            fontWeight: 700,
+            letterSpacing: "-0.04em",
+            color: "#ffffff",
+            lineHeight: 0.93,
+          }}
+        >
+          Education
+        </h2>
+        <div
+          style={{
+            width: 40,
+            height: 1,
+            background: "rgba(255,255,255,0.2)",
+            margin: "18px auto 0",
+          }}
+        />
+      </motion.div>
+
+      {/* ── Highway container ── */}
+      <div className="container mx-auto" style={{ maxWidth: 680, padding: "0 16px" }}>
+        {/* Intrinsic-ratio box: height = VH/VW × 100% of container width */}
+        <div
+          ref={containerRef}
+          style={{
+            position: "relative",
+            paddingBottom: `${(VH / VW) * 100}%`,
+          }}
+        >
+          {/* ── SVG: road outlines + dot path + animated dot ── */}
           <svg
+            ref={svgRef}
             viewBox={`0 0 ${VW} ${VH}`}
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              overflow: "visible",
-            }}
-            preserveAspectRatio="xMidYMid meet"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible" }}
+            aria-hidden
           >
             <defs>
-              <filter id="pathGlow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="8" result="blur" />
+              <filter id="eduDotGlow" x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur stdDeviation="6" result="blur" />
                 <feMerge>
                   <feMergeNode in="blur" />
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
-              <filter id="dotGlow" x="-200%" y="-200%" width="500%" height="500%">
-                <feGaussianBlur stdDeviation="5" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-              <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.9" />
-                <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0.6" />
+
+              {/* Gradient for active path */}
+              <linearGradient id="activePathGrad" gradientUnits="userSpaceOnUse"
+                x1="0" y1="0" x2={VW} y2={VH}>
+                <stop offset="0%" stopColor="rgba(255,255,255,0.65)" />
+                <stop offset="100%" stopColor="rgba(255,255,255,0.35)" />
               </linearGradient>
             </defs>
 
-            {/* Ghost road (faint static) */}
-            <path
-              d={ROAD_PATH}
-              fill="none"
-              stroke="rgba(34,211,238,0.10)"
-              strokeWidth="2.5"
-              strokeDasharray="6 10"
-            />
-
-            {/* Animated glowing road */}
-            <motion.path
-              d={ROAD_PATH}
-              fill="none"
-              stroke="url(#cyanGrad)"
-              strokeWidth="3"
-              strokeLinecap="round"
-              filter="url(#pathGlow)"
-              style={{ pathLength, opacity: glowOpacity }}
-            />
-
-            {/* Milestone dots */}
-            {milestones.map((m) => (
-              <g key={m.num} filter="url(#dotGlow)">
-                {/* Outer pulsing ring — fixed r, animate opacity only */}
-                <motion.circle
-                  cx={m.dotX}
-                  cy={m.dotY}
-                  r={18}
-                  fill="none"
-                  stroke={m.color}
-                  strokeWidth="1.5"
-                  animate={{ opacity: [0.7, 0.05, 0.7] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                />
-                {/* Middle ring */}
-                <motion.circle
-                  cx={m.dotX}
-                  cy={m.dotY}
-                  r={10}
-                  fill="none"
-                  stroke={m.color}
-                  strokeWidth="1"
-                  animate={{ opacity: [0.4, 0.8, 0.4] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
-                />
-                {/* Inner filled dot */}
-                <circle cx={m.dotX} cy={m.dotY} r={6} fill={m.color} opacity={0.95} />
-                <circle cx={m.dotX} cy={m.dotY} r={3} fill="#ffffff" />
-              </g>
+            {/* Pill outlines (static highway lanes) */}
+            {PILL_RECTS.map((r, i) => (
+              <rect
+                key={i}
+                x={r.x}
+                y={r.y}
+                width={r.w}
+                height={r.h}
+                rx={r.rx}
+                fill="none"
+                stroke={i <= activeIndex ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.07)"}
+                strokeWidth="1.5"
+                style={{ transition: "stroke 0.6s" }}
+              />
             ))}
+
+            {/* Ghost center-line path (always visible, very faint) */}
+            <path
+              d={DOT_PATH}
+              fill="none"
+              stroke="rgba(255,255,255,0.07)"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeDasharray="4 8"
+            />
+
+            {/* Animated active path */}
+            <motion.path
+              ref={pathRef}
+              d={DOT_PATH}
+              fill="none"
+              stroke="url(#activePathGrad)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              style={{ pathLength }}
+              filter="url(#eduDotGlow)"
+            />
+
+            {/* Milestone dots on the path */}
+            {TRIGGER_FRACTIONS.map((_, i) => {
+              const cy = CY[i];
+              const isLeft = MILESTONES[i].side === "left";
+              const cx = isLeft ? LEFT_CAP_R : RIGHT_CAP_L;
+              const active = i <= activeIndex;
+              return (
+                <g key={i}>
+                  {active && MILESTONES[i].isCurrent && (
+                    <motion.circle
+                      cx={cx} cy={cy} r={14}
+                      fill="none"
+                      stroke="rgba(255,255,255,0.3)"
+                      strokeWidth="1"
+                      animate={{ opacity: [0.5, 0, 0.5] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                  )}
+                  <circle
+                    cx={cx} cy={cy} r={5}
+                    fill={active ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.15)"}
+                    style={{ transition: "fill 0.5s" }}
+                  />
+                  <circle cx={cx} cy={cy} r={2.5} fill="rgba(0,0,0,0.6)" />
+                </g>
+              );
+            })}
+
+            {/* Moving dot */}
+            <circle
+              cx={dotPos.x}
+              cy={dotPos.y}
+              r={7}
+              fill="rgba(255,255,255,0.95)"
+              filter="url(#eduDotGlow)"
+            />
+            <circle
+              cx={dotPos.x}
+              cy={dotPos.y}
+              r={3.5}
+              fill="rgba(0,0,0,0.5)"
+            />
           </svg>
 
-          {/* Cards */}
-          {milestones.map((m) => (
-            <Card key={m.num} m={m} />
-          ))}
-        </div>
-
-        {/* Mobile: vertical stack */}
-        <div className="md:hidden flex flex-col gap-6 relative">
-          <div
-            aria-hidden
-            style={{
-              position: "absolute",
-              left: 20,
-              top: 0,
-              bottom: 0,
-              width: 1,
-              background: "linear-gradient(to bottom, transparent, rgba(34,211,238,0.4), transparent)",
-            }}
-          />
-          {milestones.map((m, i) => (
-            <MobileCard key={m.num} m={m} index={i} />
+          {/* ── Pill content (absolutely positioned to match SVG) ── */}
+          {MILESTONES.map((m, i) => (
+            <PillCard
+              key={m.num}
+              m={m}
+              rect={PILL_RECTS[i]}
+              isActive={i <= activeIndex}
+              index={i}
+            />
           ))}
         </div>
       </div>

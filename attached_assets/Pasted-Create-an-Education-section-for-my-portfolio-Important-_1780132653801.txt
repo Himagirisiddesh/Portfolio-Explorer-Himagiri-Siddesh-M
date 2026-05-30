@@ -1,0 +1,106 @@
+Create an Education section for my portfolio.
+
+Important:
+
+The section background must remain EXACTLY the same as the rest of my portfolio.
+
+Do NOT create a separate background for this section.
+
+Do NOT use infographic poster styling.
+
+Do NOT use a different color theme.
+
+The Education section must feel like it naturally belongs to the website and continues the same visual experience from the previous section.
+
+Layout:
+
+- Use a thick roadmap/highway path.
+- The roadmap itself should be the main layout.
+- Alternate left → right → left → right.
+- Each milestone should be integrated into the roadmap.
+- Clean typography.
+- Minimal content.
+- Premium modern design.
+- Not overly futuristic.
+- Not cyberpunk.
+- Not too many glowing effects.
+
+Education Data:
+
+01
+SSLC
+2019 – 2020
+Secondary School Leaving Certificate
+73.2%
+
+02
+PUC
+2020 – 2022
+Pre-University Course
+
+03
+BCA
+2022 – 2025
+KLE Society's Degree College
+CGPA: 8.4
+
+04 (CURRENT)
+MCA
+2025 – 2027
+RNS Institute of Technology
+CGPA: 9.39
+
+05
+Future Goal
+DevOps Engineer
+
+Roadmap Animation:
+
+As the user scrolls down:
+
+- A glowing circular dot should travel along the roadmap path.
+- The dot must follow the exact SVG path.
+- The dot represents my educational journey.
+- The dot should move smoothly according to scroll progress.
+- The path behind the dot becomes highlighted.
+- The path ahead remains inactive.
+- The animation should be synchronized with scrolling.
+
+Milestone Activation:
+
+When the moving dot reaches a milestone:
+
+- That milestone becomes active.
+- Card content fades in.
+- Road segment glows slightly.
+- Number indicator becomes highlighted.
+- Small pulse animation appears.
+
+Current Stage (MCA):
+
+The MCA milestone is my current stage.
+
+When the dot reaches MCA:
+
+- Show a subtle CURRENT badge.
+- Add a pulsing ring around the MCA node.
+- Slightly stronger glow than other milestones.
+
+Additional Effects:
+
+- Subtle floating particles.
+- Very light parallax movement.
+- Smooth Framer Motion animations.
+- Scroll-driven SVG path drawing.
+- Premium interactions.
+
+Avoid:
+
+- Timeline layouts.
+- Floating cards disconnected from the path.
+- Heavy neon effects.
+- Different background colors.
+- Excessive glow.
+- Poster-style infographic appearance.
+
+The final result should feel like a premium portfolio section where a moving dot travels through my academic journey as the user scrolls.
