@@ -25,40 +25,30 @@ const MILESTONES = [
     institution: "RNS Institute of Technology", year: "2025 – 2027", score: "CGPA: 9.39",
     isCurrent: true, isFuture: false,
   },
-  {
-    num: "05", side: "left" as const,
-    short: "DevOps Engineer", degree: "Building scalable cloud infrastructure and automation systems.",
-    institution: "", year: "Future Goal", score: "",
-    isCurrent: false, isFuture: true,
-  },
 ];
 
-/* ─── SVG layout constants (viewBox = 0 0 680 1100) ─────── */
+/* ─── SVG layout constants (viewBox = 0 0 680 800) ──────── */
 const VW = 680;
-const VH = 1100;
+const VH = 800;
 const PILL_W = 510;           // 75% of 680
 const PILL_H = 120;
 const PILL_RX = 60;           // half-height cap
 const GAP = 80;               // vertical gap between pills
 
-/* Pill vertical centers */
-const CY = [0, 1, 2, 3, 4].map((i) => PILL_RX + i * (PILL_H + GAP));
-// = [60, 260, 460, 660, 860]
+/* Pill vertical centers — 4 milestones */
+const CY = [0, 1, 2, 3].map((i) => PILL_RX + i * (PILL_H + GAP));
+// = [60, 260, 460, 660]
 
 /* Left pill: x=0..510, Right pill: x=170..680 */
-const LEFT_CAP_L  = PILL_RX;                     // 60
-const LEFT_CAP_R  = PILL_W - PILL_RX;            // 450
-const RIGHT_CAP_L = (VW - PILL_W) + PILL_RX;    // 230
-const RIGHT_CAP_R = VW - PILL_RX;               // 620
+const LEFT_CAP_L  = PILL_RX;                    // 60
+const LEFT_CAP_R  = PILL_W - PILL_RX;           // 450
+const RIGHT_CAP_L = (VW - PILL_W) + PILL_RX;   // 230
+const RIGHT_CAP_R = VW - PILL_RX;              // 620
 
 /*
-  Center-line path the dot travels:
-  - Pill 1 (left, cy=60):  entry from top → left cap → right cap
-  - Right hairpin          → Pill 2 right cap (cy=260)
-  - Pill 2 (right, cy=260): right cap → left cap
-  - Left hairpin           → Pill 3 left cap (cy=460)
-  - ... repeat
-  - Exit from Pill 5 right cap to bottom
+  Center-line path:
+  Top → Pill1(left) → right hairpin → Pill2(right) →
+  left hairpin → Pill3(left) → right hairpin → Pill4(right) → exit
 */
 const DOT_PATH = [
   `M ${VW / 2} -10`,
@@ -70,9 +60,7 @@ const DOT_PATH = [
   `L ${LEFT_CAP_R} ${CY[2]}`,
   `C ${VW} ${CY[2]}, ${VW} ${CY[3]}, ${RIGHT_CAP_R} ${CY[3]}`,
   `L ${RIGHT_CAP_L} ${CY[3]}`,
-  `C 0 ${CY[3]}, 0 ${CY[4]}, ${LEFT_CAP_L} ${CY[4]}`,
-  `L ${LEFT_CAP_R} ${CY[4]}`,
-  `C ${PILL_W} ${CY[4]}, ${VW / 2} ${CY[4] + 60}, ${VW / 2} ${VH - 10}`,
+  `C ${PILL_W - 40} ${CY[3]}, ${VW / 2} ${CY[3] + 70}, ${VW / 2} ${VH - 10}`,
 ].join(" ");
 
 /* Pill rects in SVG space */
@@ -201,23 +189,6 @@ function PillCard({
               Current
             </span>
           )}
-          {m.isFuture && (
-            <span
-              style={{
-                fontFamily: "monospace",
-                fontSize: "min(1.2vw, 9px)",
-                letterSpacing: "0.2em",
-                color: "rgba(255,255,255,0.4)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                padding: "1px 6px",
-                borderRadius: 99,
-                textTransform: "uppercase",
-                whiteSpace: "nowrap",
-              }}
-            >
-              Future
-            </span>
-          )}
         </div>
 
         {/* Short name */}
@@ -286,7 +257,7 @@ export function Education() {
   const [pathProgress, setPathProgress] = useState(0);
 
   /* Milestone "trigger" lengths along the path (0-1) */
-  const TRIGGER_FRACTIONS = [0.12, 0.30, 0.48, 0.66, 0.84];
+  const TRIGGER_FRACTIONS = [0.12, 0.34, 0.58, 0.80];
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
