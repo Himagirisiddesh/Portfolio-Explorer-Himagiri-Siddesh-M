@@ -1,0 +1,117 @@
+Redesign the Contact section completely to match the exact aesthetic of the portfolio.
+
+The portfolio already uses:
+
+* Black background
+* Subtle blue glow effects
+* Thin typography
+* Premium minimal design
+* Large whitespace
+* Futuristic but elegant appearance
+
+The Contact section must feel like the final premium ending of the portfolio.
+
+Remove all large cards, glassmorphism panels, statistics counters, technology icons, planets, excessive gradients, and unnecessary decorative elements.
+
+Layout:
+
+Create a two-column layout.
+
+Left Side:
+
+Small section label:
+LET'S CONNECT
+
+Add a thin horizontal blue accent line beside the label.
+
+Main Heading:
+
+Let's build
+something
+impactful.
+
+Make the heading extremely large and elegant (80–100px).
+
+Highlight only the word "impactful." with a subtle blue gradient.
+
+Below the heading add:
+
+Currently open for new opportunities, collaborations and challenging projects.
+
+If you have an idea, let's bring it to life.
+
+Add a single premium button:
+
+Get In Touch →
+
+Right Side:
+
+Display contact information vertically with generous spacing.
+
+EMAIL
+[himagirisiddesh@gmail.com](mailto:himagirisiddesh@gmail.com)
+
+PHONE
++91 91484 90736
+
+LOCATION
+Bengaluru, India
+
+Each item should have:
+
+* Thin divider line
+* Small subtle icon
+* Hover glow effect
+
+Button Functionality:
+
+The "Get In Touch" button must directly open the user's default email application.
+
+Use:
+
+mailto:himagirisiddesh@gmail.com?subject=Opportunity%20for%20Himagiri%20Siddesh
+
+When the button is clicked:
+
+* Open email application directly
+* Prefill recipient email
+* Prefill subject line
+* Do not open a popup
+* Do not open a contact form
+* Do not scroll anywhere
+
+Animations:
+
+* Smooth fade-in when section enters viewport
+* Text reveal animation for headline
+* Small glowing blue dot beside "LET'S CONNECT"
+* Button border glow on hover
+* Gentle floating particles in background
+* Subtle mouse parallax effect
+* Soft blue ambient glow behind content
+* Thin animated lines matching Experience section
+
+Background:
+
+Keep the exact same background style used throughout the portfolio.
+
+Use:
+
+* Black background
+* Subtle blue radial glow
+* Very faint grid texture
+* Minimal floating particles
+* Large empty space around content
+
+Do NOT use:
+
+* Contact forms
+* Giant cards
+* Dashboard layouts
+* Stats counters
+* Skill icons
+* Social media cards
+* Bright neon colors
+* Overly complex graphics
+
+The final result should look like a premium Apple × Linear × Stripe inspired developer portfolio ending section that feels calm, minimal, futuristic, and highly professional.
