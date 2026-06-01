@@ -1,341 +1,566 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
+import { SiGithub } from "react-icons/si";
+import { FaLinkedin } from "react-icons/fa";
+import { MdEmail, MdLocationOn } from "react-icons/md";
+import {
+  FaGraduationCap, FaBriefcase, FaCode, FaCloud,
+  FaArrowRight, FaDownload,
+} from "react-icons/fa";
 
 const PORTRAIT = "/himagiri.png";
+const RESUME   = "/himagiri-resume.pdf";
 
-/* Magnetic hover button */
-function MagBtn({
-  children,
-  className,
-  style,
-  onClick,
-  href,
-}: {
+const ROLES = [
+  "AI/ML Engineer",
+  "Full Stack Developer",
+  "DevOps Engineer",
+  "Cloud Engineer",
+];
+
+/* ── Typewriter hook ── */
+function useTypewriter(words: string[], typingSpeed = 75, erasingSpeed = 40, pauseMs = 1800) {
+  const [index, setIndex]       = useState(0);
+  const [display, setDisplay]   = useState("");
+  const [isTyping, setIsTyping] = useState(true);
+
+  useEffect(() => {
+    const word = words[index];
+    let timer: ReturnType<typeof setTimeout>;
+
+    if (isTyping) {
+      if (display.length < word.length) {
+        timer = setTimeout(() => setDisplay(word.slice(0, display.length + 1)), typingSpeed);
+      } else {
+        timer = setTimeout(() => setIsTyping(false), pauseMs);
+      }
+    } else {
+      if (display.length > 0) {
+        timer = setTimeout(() => setDisplay(display.slice(0, -1)), erasingSpeed);
+      } else {
+        setIndex((i) => (i + 1) % words.length);
+        setIsTyping(true);
+      }
+    }
+    return () => clearTimeout(timer);
+  }, [display, isTyping, index, words, typingSpeed, erasingSpeed, pauseMs]);
+
+  return display;
+}
+
+/* ── Magnetic button ── */
+function MagBtn({ children, style, onClick, href, download }: {
   children: React.ReactNode;
-  className?: string;
   style?: React.CSSProperties;
   onClick?: () => void;
   href?: string;
+  download?: string;
 }) {
-  const ref = useRef<HTMLElement>(null);
+  const aRef = useRef<HTMLAnchorElement>(null);
+  const bRef = useRef<HTMLButtonElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const sx = useSpring(x, { stiffness: 280, damping: 18 });
   const sy = useSpring(y, { stiffness: 280, damping: 18 });
 
   const onMove = (e: React.MouseEvent) => {
-    const el = ref.current;
+    const el = (aRef.current ?? bRef.current) as HTMLElement | null;
     if (!el) return;
     const r = el.getBoundingClientRect();
-    x.set((e.clientX - r.left - r.width / 2) * 0.22);
-    y.set((e.clientY - r.top - r.height / 2) * 0.22);
+    x.set((e.clientX - r.left - r.width / 2) * 0.18);
+    y.set((e.clientY - r.top - r.height / 2) * 0.18);
   };
   const onLeave = () => { x.set(0); y.set(0); };
 
-  const shared = { ref, style: { ...style, x: sx, y: sy }, onMouseMove: onMove, onMouseLeave: onLeave, className };
-  if (href) return <motion.a {...shared} href={href}>{children}</motion.a>;
-  return <motion.button {...shared} onClick={onClick}>{children}</motion.button>;
+  if (href) return (
+    <motion.a
+      ref={aRef}
+      href={href}
+      download={download}
+      style={{ ...style, x: sx, y: sy, textDecoration: "none" }}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      whileHover={{ scale: 1.04 }}
+      whileTap={{ scale: 0.97 }}
+    >
+      {children}
+    </motion.a>
+  );
+  return (
+    <motion.button
+      ref={bRef}
+      onClick={onClick}
+      style={{ ...style, x: sx, y: sy, border: "none", cursor: "pointer" }}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      whileHover={{ scale: 1.04 }}
+      whileTap={{ scale: 0.97 }}
+    >
+      {children}
+    </motion.button>
+  );
 }
 
-/* Single-line text slide-up reveal */
-function Reveal({ children, delay = 0, className }: { children: React.ReactNode; delay?: number; className?: string }) {
+/* ── Role breadcrumb ── */
+function RolePill({ label, active }: { label: string; active: boolean }) {
   return (
-    <span className={className} style={{ display: "inline-block", overflow: "hidden", verticalAlign: "top" }}>
-      <motion.span
-        style={{ display: "block" }}
-        initial={{ y: "105%", opacity: 0 }}
-        animate={{ y: "0%", opacity: 1 }}
-        transition={{ duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {children}
-      </motion.span>
-    </span>
+    <div style={{
+      display: "flex", alignItems: "center", gap: 6,
+      opacity: active ? 1 : 0.35,
+      transition: "opacity 0.4s",
+    }}>
+      <span style={{
+        fontSize: 11, fontFamily: "monospace", letterSpacing: "0.04em",
+        color: active ? "#93c5fd" : "rgba(255,255,255,0.55)",
+        transition: "color 0.4s",
+        whiteSpace: "nowrap",
+      }}>
+        {label}
+      </span>
+    </div>
+  );
+}
+
+/* ── Decorative ring ── */
+function Ring({ size, opacity, delay }: { size: number; opacity: number; delay: number }) {
+  return (
+    <motion.div
+      style={{
+        position: "absolute", width: size, height: size,
+        borderRadius: "50%",
+        border: "1px solid rgba(99,179,237,0.18)",
+        top: "50%", left: "50%",
+        transform: "translate(-50%,-50%)",
+        pointerEvents: "none",
+      }}
+      animate={{ opacity: [opacity * 0.5, opacity, opacity * 0.5], scale: [1, 1.02, 1] }}
+      transition={{ duration: 4 + delay, repeat: Infinity, delay, ease: "easeInOut" }}
+    />
   );
 }
 
 export function Hero() {
+  const role        = useTypewriter(ROLES);
+  const activeIndex = ROLES.findIndex((r) => r.startsWith(role.slice(0, 4))) ?? 0;
+
   const scrollTo = (id: string) =>
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
   return (
     <section
       id="hero"
-      className="relative overflow-hidden"
-      style={{ minHeight: "100svh" }}
+      style={{
+        position: "relative", minHeight: "100svh", overflow: "hidden",
+        display: "flex", flexDirection: "column",
+      }}
     >
-      {/* ── Giant "HIMAGIRI" — behind portrait ── */}
-      <div
-        aria-hidden
-        className="pointer-events-none select-none absolute inset-0 z-[2] overflow-hidden flex items-center"
-      >
-        <motion.div
-          initial={{ opacity: 0, x: 80 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          style={{
-            fontSize: "clamp(88px, 21.5vw, 330px)",
-            fontWeight: 800,
-            color: "rgba(255,255,255,0.042)",
-            letterSpacing: "-0.045em",
-            lineHeight: 0.88,
-            paddingLeft: "3vw",
-            whiteSpace: "nowrap",
-          }}
-        >
-          HIMAGIRI
-        </motion.div>
-      </div>
+      {/* ── Main two-column layout ── */}
+      <div style={{
+        flex: 1, display: "flex", alignItems: "center",
+        padding: "clamp(100px, 12vh, 140px) clamp(24px, 5vw, 80px) 0",
+        gap: "clamp(24px, 4vw, 60px)",
+        position: "relative", zIndex: 6,
+      }}>
 
-      {/* ── Portrait — dominant center-right ── */}
-      <motion.div
-        className="absolute z-[3] bottom-0"
-        style={{ right: "5vw" }}
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.1, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {/* Ambient blue/purple glow behind portrait */}
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            inset: "-8% -10%",
-            background:
-              "radial-gradient(ellipse at 50% 38%, rgba(37,99,235,0.32) 0%, rgba(124,58,237,0.15) 42%, transparent 68%)",
-            filter: "blur(40px)",
-            zIndex: 0,
-            pointerEvents: "none",
-          }}
-        />
+        {/* ════════════ LEFT COLUMN ════════════ */}
+        <div style={{ flex: "0 0 auto", width: "min(540px, 52vw)", display: "flex", flexDirection: "column" }}>
 
-        {/* Portrait with slow float */}
-        <motion.img
-          src={PORTRAIT}
-          alt="Himagiri Siddesh"
-          draggable={false}
-          animate={{ y: [0, -16, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          style={{
-            position: "relative",
-            zIndex: 1,
-            height: "clamp(480px, 92vh, 920px)",
-            width: "auto",
-            objectFit: "contain",
-            objectPosition: "bottom center",
-            filter:
-              "drop-shadow(-10px 0 36px rgba(37,99,235,0.55)) drop-shadow(8px 0 24px rgba(124,58,237,0.32)) drop-shadow(0 -12px 40px rgba(37,99,235,0.18))",
-          }}
-        />
-
-        {/* Fade portrait into page at the bottom */}
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "42%",
-            background:
-              "linear-gradient(to top, #050505 0%, rgba(5,5,5,0.8) 35%, transparent 100%)",
-            zIndex: 2,
-            pointerEvents: "none",
-          }}
-        />
-      </motion.div>
-
-      {/* ── "SIDDESH" — in front of portrait (lower / faded area) ── */}
-      <div
-        aria-hidden
-        className="pointer-events-none select-none absolute z-[4] overflow-hidden"
-        style={{ bottom: "1.5vh", left: 0, right: 0 }}
-      >
-        <motion.div
-          initial={{ opacity: 0, x: -80 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          style={{
-            fontSize: "clamp(88px, 21.5vw, 330px)",
-            fontWeight: 800,
-            color: "rgba(255,255,255,0.062)",
-            letterSpacing: "-0.045em",
-            lineHeight: 0.88,
-            textAlign: "right",
-            paddingRight: "3vw",
-            whiteSpace: "nowrap",
-          }}
-        >
-          SIDDESH
-        </motion.div>
-      </div>
-
-      {/* ── Left content block ── */}
-      <div
-        className="absolute z-[6]"
-        style={{
-          left: "clamp(24px, 5vw, 80px)",
-          top: "50%",
-          transform: "translateY(-50%)",
-          maxWidth: "min(400px, 36vw)",
-        }}
-      >
-        {/* Label */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.55 }}
-          className="flex items-center gap-3 mb-8"
-        >
-          <div style={{ width: 20, height: 1, background: "rgba(99,130,246,0.65)" }} />
-          <span
-            className="font-mono uppercase"
-            style={{ fontSize: 10, letterSpacing: "0.38em", color: "rgba(147,197,253,0.6)" }}
+          {/* AI · ML · FULL STACK tag */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.6 }}
+            style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}
           >
-            AI&nbsp;•&nbsp;ML&nbsp;•&nbsp;Full Stack
-          </span>
-        </motion.div>
+            <div style={{ width: 28, height: 1.5, background: "#3b82f6", borderRadius: 99 }} />
+            <span style={{
+              fontFamily: "monospace", fontSize: 10, letterSpacing: "0.42em",
+              textTransform: "uppercase", color: "rgba(147,197,253,0.7)",
+            }}>
+              AI &nbsp;·&nbsp; ML &nbsp;·&nbsp; Full Stack
+            </span>
+          </motion.div>
 
-        {/* Hello, I'm */}
-        <div className="mb-1" style={{ overflow: "hidden" }}>
-          <span
-            className="font-mono uppercase"
-            style={{ fontSize: 11, letterSpacing: "0.28em", color: "rgba(255,255,255,0.3)" }}
+          {/* Hi, I'm */}
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+            style={{ fontSize: "clamp(18px, 2.4vw, 28px)", color: "rgba(255,255,255,0.65)", fontWeight: 300, marginBottom: 4 }}
           >
-            <Reveal delay={0.65}>Hello, I'm</Reveal>
-          </span>
+            Hi, I'm
+          </motion.p>
+
+          {/* Name */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              fontSize: "clamp(42px, 6.5vw, 88px)", fontWeight: 800,
+              letterSpacing: "-0.035em", lineHeight: 1, color: "#ffffff",
+              marginBottom: 18,
+            }}
+          >
+            Himagiri Siddesh
+          </motion.h1>
+
+          {/* I'm an [role] | */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.0 }}
+            style={{
+              fontSize: "clamp(16px, 2.2vw, 26px)", fontWeight: 400,
+              color: "rgba(255,255,255,0.75)", marginBottom: 18,
+              display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap",
+            }}
+          >
+            <span>I'm an</span>
+            <span style={{ color: "#60a5fa", fontWeight: 700 }}>{role}</span>
+            <motion.span
+              animate={{ opacity: [1, 0, 1] }}
+              transition={{ duration: 0.85, repeat: Infinity }}
+              style={{ color: "#3b82f6", fontWeight: 700, fontSize: "1.1em" }}
+            >
+              |
+            </motion.span>
+          </motion.div>
+
+          {/* Role breadcrumb bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.1 }}
+            style={{
+              display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap",
+              border: "1px solid rgba(99,179,237,0.2)", borderRadius: 99,
+              padding: "8px 16px", marginBottom: 24,
+              background: "rgba(99,179,237,0.04)",
+              width: "fit-content",
+            }}
+          >
+            {/* Active dot */}
+            <motion.div
+              style={{ width: 6, height: 6, borderRadius: "50%", background: "#3b82f6", flexShrink: 0 }}
+              animate={{ boxShadow: ["0 0 0px rgba(59,130,246,0)", "0 0 10px rgba(59,130,246,0.9)", "0 0 0px rgba(59,130,246,0)"] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            />
+            {ROLES.map((r, i) => (
+              <div key={r} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <RolePill label={r} active={r.startsWith(role.slice(0, 4)) || (role.length === 0 && i === 0)} />
+                {i < ROLES.length - 1 && (
+                  <FaArrowRight size={8} color="rgba(255,255,255,0.2)" />
+                )}
+              </div>
+            ))}
+            <motion.div
+              style={{ width: 6, height: 6, borderRadius: "50%", background: "#3b82f6", flexShrink: 0 }}
+              animate={{ boxShadow: ["0 0 0px rgba(59,130,246,0)", "0 0 10px rgba(59,130,246,0.9)", "0 0 0px rgba(59,130,246,0)"] }}
+              transition={{ duration: 1.5, repeat: Infinity, delay: 0.75 }}
+            />
+          </motion.div>
+
+          {/* Description */}
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 1.2 }}
+            style={{
+              fontSize: "clamp(13px, 1.4vw, 16px)", color: "rgba(255,255,255,0.45)",
+              lineHeight: 1.8, marginBottom: 32, maxWidth: 460,
+            }}
+          >
+            I build intelligent systems and scalable web applications that solve real-world problems using modern technologies and cloud-driven architectures.
+          </motion.p>
+
+          {/* Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 1.35 }}
+            style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 36 }}
+          >
+            {/* Explore My Work — filled blue */}
+            <MagBtn
+              onClick={() => scrollTo("projects")}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 10,
+                background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                color: "#ffffff", padding: "13px 24px",
+                fontFamily: "monospace", fontSize: 10.5, letterSpacing: "0.2em", textTransform: "uppercase",
+                fontWeight: 700, borderRadius: 6,
+                boxShadow: "0 4px 24px rgba(37,99,235,0.45), inset 0 1px 0 rgba(255,255,255,0.15)",
+                position: "relative", overflow: "hidden",
+              }}
+            >
+              {/* Shine */}
+              <motion.div
+                style={{
+                  position: "absolute", top: 0, left: "-60%", width: "40%", height: "100%",
+                  background: "linear-gradient(105deg, transparent, rgba(255,255,255,0.2), transparent)",
+                  transform: "skewX(-15deg)",
+                }}
+                animate={{ left: ["−60%", "160%"] }}
+                transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 2 }}
+              />
+              <span style={{ position: "relative", zIndex: 1 }}>Explore My Work</span>
+              <FaArrowRight size={10} style={{ position: "relative", zIndex: 1 }} />
+            </MagBtn>
+
+            {/* Download Resume — outline */}
+            <MagBtn
+              href={RESUME}
+              download="HimagiriSiddesh_Resume.pdf"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 10,
+                border: "1px solid rgba(255,255,255,0.22)",
+                background: "rgba(255,255,255,0.04)",
+                color: "rgba(255,255,255,0.78)", padding: "13px 24px",
+                fontFamily: "monospace", fontSize: 10.5, letterSpacing: "0.2em", textTransform: "uppercase",
+                fontWeight: 600, borderRadius: 6,
+                transition: "border-color 0.25s, background 0.25s, color 0.25s",
+              }}
+            >
+              Download Resume
+              <FaDownload size={10} />
+            </MagBtn>
+          </motion.div>
+
+          {/* Stats row */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 1.6 }}
+            style={{
+              display: "flex", gap: 0,
+              borderTop: "1px solid rgba(255,255,255,0.07)",
+              paddingTop: 24,
+            }}
+          >
+            {[
+              { icon: FaGraduationCap, v: "9.39", l: "CGPA" },
+              { icon: FaBriefcase,     v: "2+",   l: "Internships" },
+              { icon: FaCode,          v: "4+",   l: "Projects" },
+              { icon: FaCloud,         v: "AI",   l: "Systems Built", sub: "End-to-end" },
+            ].map((s, i) => (
+              <div key={s.l} style={{
+                flex: 1, display: "flex", flexDirection: "column", gap: 5,
+                paddingRight: 16, paddingLeft: i > 0 ? 16 : 0,
+                borderRight: i < 3 ? "1px solid rgba(255,255,255,0.07)" : "none",
+              }}>
+                <s.icon size={18} color="rgba(99,179,237,0.7)" />
+                <span style={{ fontSize: "clamp(18px, 2.2vw, 24px)", fontWeight: 700, color: "#ffffff", letterSpacing: "-0.02em", lineHeight: 1 }}>
+                  {s.v}
+                </span>
+                <div>
+                  <div style={{ fontFamily: "monospace", fontSize: 9, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>
+                    {s.l}
+                  </div>
+                  {s.sub && (
+                    <div style={{ fontFamily: "monospace", fontSize: 8, color: "rgba(255,255,255,0.18)", letterSpacing: "0.15em" }}>
+                      {s.sub}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </motion.div>
         </div>
 
-        {/* Name */}
-        <h1
-          className="font-light leading-[1.04] tracking-tight mb-6 text-white"
-          style={{ fontSize: "clamp(32px, 4.2vw, 58px)" }}
-        >
-          <Reveal delay={0.75}>Himagiri</Reveal>
-          <br />
-          <Reveal delay={0.88}>Siddesh</Reveal>
-        </h1>
+        {/* ════════════ RIGHT COLUMN — Portrait ════════════ */}
+        <div style={{ flex: 1, position: "relative", display: "flex", justifyContent: "center", alignItems: "flex-end", minHeight: "clamp(400px, 75vh, 750px)" }}>
 
-        {/* Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 1.05 }}
-          className="font-mono uppercase mb-5"
-          style={{ fontSize: 10, letterSpacing: "0.22em", color: "rgba(255,255,255,0.32)", lineHeight: 1.8 }}
-        >
-          MCA Student &nbsp;|&nbsp; AI/ML Engineer
-          <br />
-          Full Stack Developer
-        </motion.p>
-
-        {/* Description */}
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 1.18 }}
-          className="font-light leading-relaxed mb-10"
-          style={{ fontSize: "clamp(13px, 1.3vw, 16px)", color: "rgba(255,255,255,0.42)" }}
-        >
-          Building intelligent systems, modern web
-          applications, and scalable digital experiences.
-        </motion.p>
-
-        {/* Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 1.35 }}
-          className="flex gap-4 flex-wrap"
-        >
-          <MagBtn
-            onClick={() => scrollTo("projects")}
-            className="px-6 py-3 font-mono uppercase text-black transition-opacity hover:opacity-90"
+          {/* Available badge */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.5 }}
             style={{
-              fontSize: 10,
-              letterSpacing: "0.2em",
-              background: "linear-gradient(135deg,#ffffff,rgba(255,255,255,0.93))",
-              cursor: "pointer",
+              position: "absolute", top: 10, right: 10, zIndex: 10,
+              display: "flex", alignItems: "center", gap: 8,
+              background: "rgba(5,5,5,0.75)", backdropFilter: "blur(12px)",
+              border: "1px solid rgba(52,211,153,0.35)",
+              borderRadius: 99, padding: "6px 14px",
             }}
           >
-            View Projects
-          </MagBtn>
-
-          <MagBtn
-            href="mailto:himagirisiddesh@gmail.com"
-            className="px-6 py-3 font-mono uppercase transition-all hover:border-white/35"
-            style={{
-              fontSize: 10,
-              letterSpacing: "0.2em",
-              border: "1px solid rgba(255,255,255,0.14)",
-              color: "rgba(255,255,255,0.58)",
-              background: "rgba(255,255,255,0.025)",
-              cursor: "pointer",
-            }}
-          >
-            Download Resume
-          </MagBtn>
-        </motion.div>
-
-        {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 1.6 }}
-          className="flex gap-8 mt-12 pt-8"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
-        >
-          {[
-            { v: "9.39", l: "CGPA" },
-            { v: "2+", l: "Internships" },
-            { v: "4+", l: "Projects" },
-          ].map((s) => (
-            <div key={s.l} className="flex flex-col gap-1">
-              <span
-                className="font-light tracking-tight text-white"
-                style={{ fontSize: "clamp(18px, 2vw, 26px)" }}
-              >
-                {s.v}
-              </span>
-              <span
-                className="font-mono uppercase"
-                style={{ fontSize: 9, letterSpacing: "0.35em", color: "rgba(255,255,255,0.25)" }}
-              >
-                {s.l}
-              </span>
+            <motion.div
+              style={{ width: 7, height: 7, borderRadius: "50%", background: "#34d399" }}
+              animate={{ boxShadow: ["0 0 0 0 rgba(52,211,153,0.4)", "0 0 0 5px rgba(52,211,153,0)", "0 0 0 0 rgba(52,211,153,0)"] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <div>
+              <div style={{ fontFamily: "monospace", fontSize: 8, letterSpacing: "0.18em", color: "rgba(52,211,153,0.9)", textTransform: "uppercase" }}>
+                Available for
+              </div>
+              <div style={{ fontFamily: "monospace", fontSize: 8.5, letterSpacing: "0.14em", color: "rgba(52,211,153,0.7)", textTransform: "uppercase" }}>
+                opportunities
+              </div>
             </div>
-          ))}
-        </motion.div>
+          </motion.div>
+
+          {/* Concentric glow rings */}
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+            <Ring size={560} opacity={0.18} delay={0} />
+            <Ring size={440} opacity={0.22} delay={1.5} />
+            <Ring size={330} opacity={0.28} delay={0.8} />
+            <Ring size={220} opacity={0.35} delay={2.2} />
+
+            {/* Blue core glow */}
+            <motion.div
+              style={{
+                position: "absolute", width: 320, height: 320, borderRadius: "50%",
+                background: "radial-gradient(circle, rgba(37,99,235,0.35) 0%, rgba(124,58,237,0.18) 45%, transparent 70%)",
+                filter: "blur(30px)",
+              }}
+              animate={{ scale: [1, 1.08, 1], opacity: [0.6, 1, 0.6] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            />
+
+            {/* Floating dots in background */}
+            {[[-100,-120],[80,-80],[-60,100],[120,60],[-130,40],[90,-140]].map(([dx,dy], i) => (
+              <motion.div
+                key={i}
+                style={{
+                  position: "absolute",
+                  width: i % 2 === 0 ? 3 : 2, height: i % 2 === 0 ? 3 : 2,
+                  borderRadius: "50%",
+                  background: i % 3 === 0 ? "rgba(99,179,237,0.8)" : "rgba(167,139,250,0.6)",
+                  left: `calc(50% + ${dx}px)`,
+                  top:  `calc(50% + ${dy}px)`,
+                }}
+                animate={{ opacity: [0.2, 1, 0.2], scale: [0.8, 1.5, 0.8] }}
+                transition={{ duration: 2.5 + i * 0.4, repeat: Infinity, delay: i * 0.5 }}
+              />
+            ))}
+          </div>
+
+          {/* Portrait */}
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            style={{ position: "relative", zIndex: 4, width: "100%", display: "flex", justifyContent: "center", alignItems: "flex-end", height: "100%" }}
+          >
+            <motion.img
+              src={PORTRAIT}
+              alt="Himagiri Siddesh"
+              draggable={false}
+              animate={{ y: [0, -12, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              style={{
+                height: "clamp(420px, 82vh, 820px)",
+                width: "auto",
+                objectFit: "contain",
+                objectPosition: "bottom center",
+                filter: "drop-shadow(-16px 0 48px rgba(37,99,235,0.65)) drop-shadow(10px 0 28px rgba(124,58,237,0.38)) drop-shadow(0 -8px 32px rgba(37,99,235,0.22))",
+                maxWidth: "100%",
+              }}
+            />
+
+            {/* Bottom fade */}
+            <div style={{
+              position: "absolute", bottom: 0, left: 0, right: 0, height: "38%",
+              background: "linear-gradient(to top, #050505 0%, rgba(5,5,5,0.7) 40%, transparent 100%)",
+              pointerEvents: "none", zIndex: 5,
+            }} />
+          </motion.div>
+        </div>
       </div>
 
-      {/* ── Edge vignette ── */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-[5]"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, transparent 48%, rgba(5,5,5,0.6) 100%)",
-        }}
-      />
-
-      {/* ── Scroll cue ── */}
+      {/* ════════════ BOTTOM BAR ════════════ */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 2.2 }}
-        className="absolute bottom-8 left-8 z-[7] flex items-center gap-3"
+        transition={{ duration: 0.8, delay: 2 }}
+        style={{
+          position: "relative", zIndex: 7,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "16px clamp(24px, 5vw, 80px) 28px",
+        }}
       >
-        <motion.div
-          style={{ width: 1, height: 32, background: "rgba(255,255,255,0.18)" }}
-          animate={{ scaleY: [1, 0.45, 1], transformOrigin: "top" }}
-          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <span
-          className="font-mono uppercase"
-          style={{ fontSize: 9, letterSpacing: "0.42em", color: "rgba(255,255,255,0.18)" }}
-        >
-          Scroll
-        </span>
+        {/* Based in */}
+        <div>
+          <div style={{ fontFamily: "monospace", fontSize: 8.5, letterSpacing: "0.38em", textTransform: "uppercase", color: "#3b82f6", marginBottom: 4 }}>
+            Based In
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <MdLocationOn size={13} color="rgba(255,255,255,0.45)" />
+            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.55)" }}>Bengaluru, India</span>
+          </div>
+        </div>
+
+        {/* Scroll cue */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+          {/* Mouse icon */}
+          <div style={{
+            width: 20, height: 30, border: "1.5px solid rgba(255,255,255,0.25)",
+            borderRadius: 10, display: "flex", justifyContent: "center", paddingTop: 5,
+          }}>
+            <motion.div
+              style={{ width: 2, height: 6, background: "rgba(255,255,255,0.5)", borderRadius: 99 }}
+              animate={{ y: [0, 8, 0], opacity: [1, 0, 1] }}
+              transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </div>
+          <span style={{
+            fontFamily: "monospace", fontSize: 8.5, letterSpacing: "0.38em",
+            textTransform: "uppercase", color: "rgba(255,255,255,0.2)",
+          }}>
+            Scroll to Explore
+          </span>
+        </div>
+
+        {/* Social icons */}
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          {[
+            { href: "https://github.com/Himagirisiddesh", Icon: SiGithub,  label: "GitHub" },
+            { href: "https://linkedin.com/in/himagiri-siddesh-m-532b102a3", Icon: FaLinkedin, label: "LinkedIn" },
+            { href: "mailto:himagirisiddesh@gmail.com", Icon: MdEmail, label: "Email" },
+          ].map(({ href, Icon, label }) => (
+            <motion.a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={label}
+              whileHover={{ scale: 1.18, y: -2 }}
+              whileTap={{ scale: 0.92 }}
+              style={{
+                width: 36, height: 36, borderRadius: "50%",
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(255,255,255,0.04)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: "rgba(255,255,255,0.5)", textDecoration: "none",
+                transition: "border-color 0.2s, background 0.2s, color 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLAnchorElement;
+                el.style.borderColor = "rgba(99,179,237,0.5)";
+                el.style.background  = "rgba(99,179,237,0.1)";
+                el.style.color       = "#93c5fd";
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLAnchorElement;
+                el.style.borderColor = "rgba(255,255,255,0.12)";
+                el.style.background  = "rgba(255,255,255,0.04)";
+                el.style.color       = "rgba(255,255,255,0.5)";
+              }}
+            >
+              <Icon size={15} />
+            </motion.a>
+          ))}
+        </div>
       </motion.div>
+
+      {/* Edge vignette */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute", inset: 0, zIndex: 5, pointerEvents: "none",
+          background: "radial-gradient(ellipse at center, transparent 50%, rgba(5,5,5,0.55) 100%)",
+        }}
+      />
     </section>
   );
 }

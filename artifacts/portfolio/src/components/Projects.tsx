@@ -484,7 +484,7 @@ export function Projects() {
           initial={{ opacity: 0, y: 32 }}
           animate={headingInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
-          style={{ marginBottom: 80 }}
+          style={{ marginBottom: 80, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
             <motion.div
@@ -499,6 +499,12 @@ export function Projects() {
             }}>
               Selected Work
             </span>
+            <motion.div
+              style={{ width: 28, height: 1, background: "#63b3ed" }}
+              initial={{ scaleX: 0 }}
+              animate={headingInView ? { scaleX: 1 } : {}}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            />
           </div>
 
           <h2 style={{
@@ -511,7 +517,7 @@ export function Projects() {
 
           <p style={{
             fontSize: 15, color: "rgba(255,255,255,0.38)", lineHeight: 1.7,
-            maxWidth: 400,
+            maxWidth: 480, textAlign: "center",
           }}>
             A collection of intelligent systems and AI products solving real-world problems.
           </p>
@@ -520,7 +526,7 @@ export function Projects() {
             initial={{ scaleX: 0 }}
             animate={headingInView ? { scaleX: 1 } : {}}
             transition={{ duration: 0.6, delay: 0.4 }}
-            style={{ width: 40, height: 2, background: "#63b3ed", marginTop: 24, transformOrigin: "left", borderRadius: 99 }}
+            style={{ width: 40, height: 2, background: "#63b3ed", marginTop: 24, borderRadius: 99 }}
           />
         </motion.div>
 
