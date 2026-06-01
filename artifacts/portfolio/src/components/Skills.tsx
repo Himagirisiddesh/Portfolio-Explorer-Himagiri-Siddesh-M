@@ -186,26 +186,6 @@ function Orb({ x, y, size, color, delay }: { x: string; y: string; size: number;
   );
 }
 
-/* ─── Scanner beam ───────────────────────────────────────── */
-function ScannerBeam() {
-  return (
-    <motion.div
-      aria-hidden
-      style={{
-        position: "absolute",
-        left: 0, right: 0,
-        height: 2,
-        background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 20%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 80%, transparent 100%)",
-        boxShadow: "0 0 20px rgba(255,255,255,0.08)",
-        pointerEvents: "none",
-      }}
-      initial={{ top: "0%" }}
-      animate={{ top: ["0%", "100%", "0%"] }}
-      transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-    />
-  );
-}
-
 /* ─── Main ───────────────────────────────────────────────── */
 export function Skills() {
   const headingRef = useRef<HTMLDivElement>(null);
@@ -232,9 +212,6 @@ export function Skills() {
           pointerEvents: "none",
         }}
       />
-
-      {/* Scanner */}
-      <ScannerBeam />
 
       <div className="container mx-auto" style={{ maxWidth: 960, padding: "0 24px", position: "relative" }}>
 

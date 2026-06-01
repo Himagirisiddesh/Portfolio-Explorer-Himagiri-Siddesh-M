@@ -463,16 +463,10 @@ export function Achievements() {
             padding: "24px 32px",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", marginBottom: 20 }}>
             <span style={{ fontFamily: "monospace", fontSize: 10, letterSpacing: "0.32em", textTransform: "uppercase", color: "rgba(255,255,255,0.26)" }}>
               Achievement Summary
             </span>
-            <motion.span
-              whileHover={{ x: 3 }}
-              style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontFamily: "monospace", color: "rgba(255,255,255,0.32)", cursor: "default", letterSpacing: "0.08em" }}
-            >
-              View All <FaArrowRight size={9} />
-            </motion.span>
           </div>
 
           <div style={{ height: 1, background: "rgba(255,255,255,0.05)", marginBottom: 22 }} />
