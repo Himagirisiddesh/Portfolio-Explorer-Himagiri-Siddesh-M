@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { name: "Experience",   id: "experience" },
   { name: "Achievements", id: "achievements" },
   { name: "Contact",      id: "contact" },
+
 ];
 
 /* ── Orbiting dot around the logo ── */

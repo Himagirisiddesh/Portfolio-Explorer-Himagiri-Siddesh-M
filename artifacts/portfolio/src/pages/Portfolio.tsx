@@ -6,7 +6,6 @@ import { Skills } from "@/components/Skills";
 import { Projects } from "@/components/Projects";
 import { Experience } from "@/components/Experience";
 import { Achievements } from "@/components/Achievements";
-import { Certifications } from "@/components/Certifications";
 import { Contact } from "@/components/Contact";
 import { Scene3D } from "@/components/Scene3D";
 
@@ -52,7 +51,6 @@ export default function Portfolio() {
           <Projects />
           <Experience />
           <Achievements />
-          <Certifications />
           <Contact />
         </main>
       </div>
