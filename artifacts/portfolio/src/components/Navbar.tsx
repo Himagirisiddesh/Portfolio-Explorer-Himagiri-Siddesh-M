@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const NAV_ITEMS = [
@@ -70,7 +70,6 @@ export function Navbar() {
   const [activeId, setActiveId]   = useState("hero");
   const [hovered, setHovered]     = useState<string | null>(null);
   const [menuOpen, setMenuOpen]   = useState(false);
-  const observersRef              = useRef<IntersectionObserver[]>([]);
 
   /* Track scroll for background */
   useEffect(() => {
@@ -79,22 +78,22 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  /* Track active section */
+  /* Track active section via scroll position */
   useEffect(() => {
-    observersRef.current.forEach((o) => o.disconnect());
-    observersRef.current = [];
-
-    NAV_ITEMS.forEach(({ id }) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const obs = new IntersectionObserver(
-        ([entry]) => { if (entry.isIntersecting) setActiveId(id); },
-        { rootMargin: "-40% 0px -55% 0px" }
-      );
-      obs.observe(el);
-      observersRef.current.push(obs);
-    });
-    return () => observersRef.current.forEach((o) => o.disconnect());
+    const onScroll = () => {
+      const scrollY = window.scrollY + window.innerHeight * 0.3;
+      let current = NAV_ITEMS[0].id;
+      for (const { id } of NAV_ITEMS) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top + window.scrollY <= scrollY) {
+          current = id;
+        }
+      }
+      setActiveId(current);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const scrollTo = (id: string) => {
