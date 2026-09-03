@@ -156,6 +156,11 @@ export function Hero() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
         >
+          <h1>
+            <small>Hi, I&apos;m</small>
+            <span>Himagiri</span>
+            <span>Siddesh M</span>
+          </h1>
           <div className="hero-copy-rule">
             <motion.i
               animate={{ scaleX: [0.4, 1, 0.4], opacity: [0.35, 1, 0.35] }}
@@ -170,16 +175,6 @@ export function Hero() {
 
         {/* Center: portrait and light field */}
         <div className="hero-portrait-stage">
-          <motion.h1
-            className="hero-centered-title"
-            initial={{ opacity: 0, y: 18, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.9, delay: 0.52, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <span>Himagiri</span>
-            <span>Siddesh M</span>
-          </motion.h1>
-
           <div className="hero-portrait-rings" aria-hidden>
             <GlowRing size={620} opacity={0.18} delay={0} />
             <GlowRing size={500} opacity={0.22} delay={1.4} />
@@ -213,7 +208,6 @@ export function Hero() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.85, ease: [0.22, 1, 0.36, 1] }}
         >
-          <span className="hero-side-kicker">INTELLIGENT SYSTEMS / 02</span>
           <p className="hero-side-description">
             I build intelligent systems and scalable web applications that solve
             real-world problems with modern technology and cloud-driven thinking.

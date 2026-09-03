@@ -238,35 +238,6 @@
   overflow: visible;
 }
 
-.hero-centered-title {
-  position: absolute;
-  top: clamp(2px, 4vh, 50px);
-  left: 50%;
-  z-index: 5;
-  width: max-content;
-  max-width: 95vw;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transform: translateX(-50%);
-  color: #f6fbff;
-  font-size: clamp(46px, 6vw, 94px);
-  font-weight: 800;
-  letter-spacing: -0.075em;
-  line-height: 0.88;
-  text-align: center;
-  text-shadow: 0 5px 30px rgba(1, 8, 24, 0.72);
-  pointer-events: none;
-}
-
-.hero-centered-title span:last-child {
-  background: linear-gradient(110deg, #e9f6ff 12%, #8fd8ff 52%, #6287ff 90%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
 .hero-portrait-rings {
   position: absolute;
   inset: 0;
@@ -296,7 +267,7 @@
 }
 
 .hero-portrait-frame img {
-  width: min(66vw, 960px);
+  width: min(72vw, 1040px);
   max-width: none;
   height: auto;
   object-fit: contain;
@@ -539,7 +510,7 @@
   }
 
   .hero-portrait-frame img {
-    width: min(70vw, 820px);
+    width: min(73vw, 880px);
   }
 
   .hero-stat {
@@ -572,11 +543,6 @@
     order: 2;
     min-height: min(660px, 83vh);
     margin: 0 -12px;
-  }
-
-  .hero-centered-title {
-    top: 8px;
-    font-size: clamp(47px, 13vw, 74px);
   }
 
   .hero-portrait-rings {

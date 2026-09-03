@@ -128,6 +128,54 @@ export function CustomCursor() {
           }}
           transition={{ rotate: { duration: hovered ? 2.2 : 8, repeat: Infinity, ease: "linear" }, opacity: { duration: 0.18 } }}
         />
+        <motion.span
+          aria-hidden
+          style={{
+            position: "absolute",
+            top: -13,
+            left: "50%",
+            width: 5,
+            height: 5,
+            borderRadius: "50%",
+            background: hovered ? "#facc15" : "#22d3ee",
+            boxShadow: hovered ? "0 0 13px #facc15" : "0 0 9px #22d3ee",
+            transform: "translateX(-50%)",
+          }}
+          animate={{ scale: hovered ? [1, 1.8, 1] : 1, opacity: hovered ? [0.65, 1, 0.65] : 0.6 }}
+          transition={{ duration: hovered ? 0.9 : 1.8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.span
+          aria-hidden
+          style={{
+            position: "absolute",
+            right: -13,
+            top: "50%",
+            width: 5,
+            height: 5,
+            borderRadius: "50%",
+            background: hovered ? "#fb7185" : "#a78bfa",
+            boxShadow: hovered ? "0 0 13px #fb7185" : "0 0 9px #a78bfa",
+            transform: "translateY(-50%)",
+          }}
+          animate={{ scale: hovered ? [1.8, 1, 1.8] : 1, opacity: hovered ? [1, 0.65, 1] : 0.6 }}
+          transition={{ duration: hovered ? 1.1 : 2.1, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.span
+          aria-hidden
+          style={{
+            position: "absolute",
+            bottom: -13,
+            left: "50%",
+            width: 5,
+            height: 5,
+            borderRadius: "50%",
+            background: hovered ? "#34d399" : "#60a5fa",
+            boxShadow: hovered ? "0 0 13px #34d399" : "0 0 9px #60a5fa",
+            transform: "translateX(-50%)",
+          }}
+          animate={{ scale: hovered ? [1, 1.7, 1] : 1, opacity: hovered ? [0.7, 1, 0.7] : 0.6 }}
+          transition={{ duration: hovered ? 1.3 : 2.4, repeat: Infinity, ease: "easeInOut" }}
+        />
       </motion.div>
 
       <motion.div
