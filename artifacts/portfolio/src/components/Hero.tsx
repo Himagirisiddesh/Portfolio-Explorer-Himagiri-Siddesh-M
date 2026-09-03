@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { SiGithub } from "react-icons/si";
 import { FaLinkedin } from "react-icons/fa";
@@ -10,43 +10,6 @@ import {
 
 const PORTRAIT = "/himagiri.png";
 const RESUME   = "/himagiri-resume.pdf";
-
-const ROLES = [
-  "AI/ML Engineer",
-  "Full Stack Developer",
-  "DevOps Engineer",
-  "Cloud Engineer",
-];
-
-/* ── Typewriter hook ── */
-function useTypewriter(words: string[], typingSpeed = 75, erasingSpeed = 40, pauseMs = 1800) {
-  const [index, setIndex]       = useState(0);
-  const [display, setDisplay]   = useState("");
-  const [isTyping, setIsTyping] = useState(true);
-
-  useEffect(() => {
-    const word = words[index];
-    let timer: ReturnType<typeof setTimeout>;
-
-    if (isTyping) {
-      if (display.length < word.length) {
-        timer = setTimeout(() => setDisplay(word.slice(0, display.length + 1)), typingSpeed);
-      } else {
-        timer = setTimeout(() => setIsTyping(false), pauseMs);
-      }
-    } else {
-      if (display.length > 0) {
-        timer = setTimeout(() => setDisplay(display.slice(0, -1)), erasingSpeed);
-      } else {
-        setIndex((i) => (i + 1) % words.length);
-        setIsTyping(true);
-      }
-    }
-    return () => clearTimeout(timer);
-  }, [display, isTyping, index, words, typingSpeed, erasingSpeed, pauseMs]);
-
-  return display;
-}
 
 /* ── Magnetic button ── */
 function MagBtn({ children, style, onClick, href, download }: {
@@ -101,26 +64,6 @@ function MagBtn({ children, style, onClick, href, download }: {
   );
 }
 
-/* ── Role breadcrumb ── */
-function RolePill({ label, active }: { label: string; active: boolean }) {
-  return (
-    <div style={{
-      display: "flex", alignItems: "center", gap: 6,
-      opacity: active ? 1 : 0.35,
-      transition: "opacity 0.4s",
-    }}>
-      <span style={{
-        fontSize: 11, fontFamily: "monospace", letterSpacing: "0.04em",
-        color: active ? "#93c5fd" : "rgba(255,255,255,0.55)",
-        transition: "color 0.4s",
-        whiteSpace: "nowrap",
-      }}>
-        {label}
-      </span>
-    </div>
-  );
-}
-
 /* ── Decorative ring ── */
 function Ring({ size, opacity, delay }: { size: number; opacity: number; delay: number }) {
   return (
@@ -140,9 +83,6 @@ function Ring({ size, opacity, delay }: { size: number; opacity: number; delay: 
 }
 
 export function Hero() {
-  const role        = useTypewriter(ROLES);
-  const activeIndex = ROLES.findIndex((r) => r.startsWith(role.slice(0, 4))) ?? 0;
-
   const scrollTo = (id: string) =>
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
@@ -181,85 +121,36 @@ export function Hero() {
             </span>
           </motion.div>
 
-          {/* Hi, I'm */}
-          <motion.p
+          {/* Greeting and full name */}
+          <motion.h1
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.7 }}
-            style={{ fontSize: "clamp(18px, 2.4vw, 28px)", color: "rgba(255,255,255,0.65)", fontWeight: 300, marginBottom: 4 }}
-          >
-            Hi, I'm
-          </motion.p>
-
-          {/* Name */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
             style={{
-              fontSize: "clamp(42px, 6.5vw, 88px)", fontWeight: 800,
-              letterSpacing: "-0.035em", lineHeight: 1, color: "#ffffff",
-              marginBottom: 18,
+              margin: "0 0 22px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+              fontWeight: 300,
+              lineHeight: 1,
             }}
           >
-            Himagiri Siddesh
+            <span style={{
+              fontSize: "clamp(18px, 2.4vw, 28px)",
+              color: "rgba(255,255,255,0.65)",
+              letterSpacing: "-0.02em",
+            }}>
+              Hi, I'm
+            </span>
+            <span style={{
+              fontSize: "clamp(42px, 6.5vw, 88px)",
+              fontWeight: 800,
+              letterSpacing: "-0.055em",
+              color: "#ffffff",
+            }}>
+              Himagiri Siddesh M
+            </span>
           </motion.h1>
-
-          {/* I'm an [role] | */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.0 }}
-            style={{
-              fontSize: "clamp(16px, 2.2vw, 26px)", fontWeight: 400,
-              color: "rgba(255,255,255,0.75)", marginBottom: 18,
-              display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap",
-            }}
-          >
-            <span>I'm an</span>
-            <span style={{ color: "#60a5fa", fontWeight: 700 }}>{role}</span>
-            <motion.span
-              animate={{ opacity: [1, 0, 1] }}
-              transition={{ duration: 0.85, repeat: Infinity }}
-              style={{ color: "#3b82f6", fontWeight: 700, fontSize: "1.1em" }}
-            >
-              |
-            </motion.span>
-          </motion.div>
-
-          {/* Role breadcrumb bar */}
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.1 }}
-            style={{
-              display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap",
-              border: "1px solid rgba(99,179,237,0.2)", borderRadius: 99,
-              padding: "8px 16px", marginBottom: 24,
-              background: "rgba(99,179,237,0.04)",
-              width: "fit-content",
-            }}
-          >
-            {/* Active dot */}
-            <motion.div
-              style={{ width: 6, height: 6, borderRadius: "50%", background: "#3b82f6", flexShrink: 0 }}
-              animate={{ boxShadow: ["0 0 0px rgba(59,130,246,0)", "0 0 10px rgba(59,130,246,0.9)", "0 0 0px rgba(59,130,246,0)"] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            />
-            {ROLES.map((r, i) => (
-              <div key={r} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <RolePill label={r} active={r.startsWith(role.slice(0, 4)) || (role.length === 0 && i === 0)} />
-                {i < ROLES.length - 1 && (
-                  <FaArrowRight size={8} color="rgba(255,255,255,0.2)" />
-                )}
-              </div>
-            ))}
-            <motion.div
-              style={{ width: 6, height: 6, borderRadius: "50%", background: "#3b82f6", flexShrink: 0 }}
-              animate={{ boxShadow: ["0 0 0px rgba(59,130,246,0)", "0 0 10px rgba(59,130,246,0.9)", "0 0 0px rgba(59,130,246,0)"] }}
-              transition={{ duration: 1.5, repeat: Infinity, delay: 0.75 }}
-            />
-          </motion.div>
 
           {/* Description */}
           <motion.p
@@ -339,7 +230,7 @@ export function Hero() {
             }}
           >
             {[
-              { icon: FaGraduationCap, v: "9.39", l: "CGPA" },
+              { icon: FaGraduationCap, v: "9.45", l: "CGPA" },
               { icon: FaBriefcase,     v: "2+",   l: "Internships" },
               { icon: FaCode,          v: "4+",   l: "Projects" },
               { icon: FaCloud,         v: "AI",   l: "Systems Built", sub: "End-to-end" },
@@ -370,34 +261,6 @@ export function Hero() {
 
         {/* ════════════ RIGHT COLUMN — Portrait ════════════ */}
         <div style={{ flex: 1, position: "relative", display: "flex", justifyContent: "center", alignItems: "flex-end", minHeight: "clamp(400px, 75vh, 750px)" }}>
-
-          {/* Available badge */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.5 }}
-            style={{
-              position: "absolute", top: 10, right: 10, zIndex: 10,
-              display: "flex", alignItems: "center", gap: 8,
-              background: "rgba(5,5,5,0.75)", backdropFilter: "blur(12px)",
-              border: "1px solid rgba(52,211,153,0.35)",
-              borderRadius: 99, padding: "6px 14px",
-            }}
-          >
-            <motion.div
-              style={{ width: 7, height: 7, borderRadius: "50%", background: "#34d399" }}
-              animate={{ boxShadow: ["0 0 0 0 rgba(52,211,153,0.4)", "0 0 0 5px rgba(52,211,153,0)", "0 0 0 0 rgba(52,211,153,0)"] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-            <div>
-              <div style={{ fontFamily: "monospace", fontSize: 8, letterSpacing: "0.18em", color: "rgba(52,211,153,0.9)", textTransform: "uppercase" }}>
-                Available for
-              </div>
-              <div style={{ fontFamily: "monospace", fontSize: 8.5, letterSpacing: "0.14em", color: "rgba(52,211,153,0.7)", textTransform: "uppercase" }}>
-                opportunities
-              </div>
-            </div>
-          </motion.div>
 
           {/* Concentric glow rings */}
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
@@ -444,7 +307,7 @@ export function Hero() {
           >
             <motion.img
               src={PORTRAIT}
-              alt="Himagiri Siddesh"
+              alt="Himagiri Siddesh M"
               draggable={false}
               animate={{ y: [0, -12, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}

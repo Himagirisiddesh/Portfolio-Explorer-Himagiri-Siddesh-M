@@ -8,6 +8,7 @@ import { Experience } from "@/components/Experience";
 import { Achievements } from "@/components/Achievements";
 import { Contact } from "@/components/Contact";
 import { Scene3D } from "@/components/Scene3D";
+import { CustomCursor } from "@/components/CustomCursor";
 
 export default function Portfolio() {
   return (
@@ -43,6 +44,7 @@ export default function Portfolio() {
 
       {/* ── All content scrolls above the fixed background ── */}
       <div style={{ position: "relative", zIndex: 2 }}>
+        <CustomCursor />
         <Navbar />
         <main>
           <Hero />

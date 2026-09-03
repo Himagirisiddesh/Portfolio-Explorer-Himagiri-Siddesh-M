@@ -22,7 +22,7 @@ const MILESTONES = [
   {
     num: "04", side: "right" as const,
     short: "MCA", degree: "Master of Computer Applications",
-    institution: "RNS Institute of Technology", year: "2025 – 2027", score: "CGPA: 9.39",
+    institution: "RNS Institute of Technology", year: "2025 – 2027", score: "CGPA: 9.45",
     isCurrent: true, isFuture: false,
   },
 ];

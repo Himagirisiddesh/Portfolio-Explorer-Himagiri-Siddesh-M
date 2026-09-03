@@ -215,7 +215,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
   const [pct, setPct] = useState(0);
   const [showShine, setShowShine] = useState(false);
 
-  const NAME = "HIMAGIRI SIDDESH";
+  const NAME = "HIMAGIRI SIDDESH M";
   const nameChars = NAME.split("").map((ch, i) => ({ ch, i }));
 
   useEffect(() => {
@@ -454,7 +454,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
               zIndex: 5,
             }}
           >
-            Portfolio · 2026
+            Himagiri Siddesh M · 2026
           </motion.div>
         )}
       </AnimatePresence>

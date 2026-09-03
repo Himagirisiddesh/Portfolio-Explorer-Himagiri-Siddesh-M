@@ -11,97 +11,6 @@ const NAV_ITEMS = [
   { name: "Contact",      id: "contact",      num: "07" },
 ];
 
-/* ── Logo hex geometry ── */
-function LogoMark({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      aria-label="Go to top"
-      style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 10 }}
-    >
-      <div style={{ position: "relative", width: 36, height: 36 }}>
-        {/* Spinning outer hex ring */}
-        <motion.svg
-          viewBox="0 0 36 36"
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-          animate={{ rotate: 360 }}
-          transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-        >
-          <polygon
-            points="18,2 32,10 32,26 18,34 4,26 4,10"
-            fill="none"
-            stroke="rgba(99,179,237,0.25)"
-            strokeWidth="1"
-            strokeDasharray="4 3"
-          />
-        </motion.svg>
-
-        {/* Counter-rotating inner hex */}
-        <motion.svg
-          viewBox="0 0 36 36"
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-          animate={{ rotate: -360 }}
-          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-        >
-          <polygon
-            points="18,7 28,13 28,23 18,29 8,23 8,13"
-            fill="none"
-            stroke="rgba(167,139,250,0.3)"
-            strokeWidth="0.8"
-          />
-        </motion.svg>
-
-        {/* Center pulse */}
-        <motion.svg
-          viewBox="0 0 36 36"
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-          animate={{ opacity: [0.4, 1, 0.4] }}
-          transition={{ duration: 2.5, repeat: Infinity }}
-        >
-          <circle cx="18" cy="18" r="3" fill="rgba(99,179,237,0.9)" />
-          <circle cx="18" cy="18" r="6" fill="none" stroke="rgba(99,179,237,0.3)" strokeWidth="0.8"/>
-        </motion.svg>
-
-        {/* Corner sparks */}
-        {[[18,2],[32,10],[32,26],[18,34],[4,26],[4,10]].map(([cx,cy], i) => (
-          <motion.div
-            key={i}
-            aria-hidden
-            style={{
-              position: "absolute",
-              width: 3, height: 3, borderRadius: "50%",
-              background: i % 2 === 0 ? "rgba(99,179,237,0.9)" : "rgba(167,139,250,0.9)",
-              left: `${(cx / 36) * 100}%`,
-              top:  `${(cy / 36) * 100}%`,
-              transform: "translate(-50%,-50%)",
-              boxShadow: `0 0 5px ${i % 2 === 0 ? "rgba(99,179,237,0.8)" : "rgba(167,139,250,0.8)"}`,
-            }}
-            animate={{ opacity: [0.2, 1, 0.2], scale: [0.6, 1.4, 0.6] }}
-            transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.3 }}
-          />
-        ))}
-      </div>
-
-      {/* HS text + tagline */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 0, lineHeight: 1 }}>
-        <motion.span
-          style={{
-            fontFamily: "monospace", fontSize: 14, fontWeight: 800,
-            letterSpacing: "0.14em", color: "#ffffff",
-          }}
-          animate={{ textShadow: ["0 0 0px transparent", "0 0 20px rgba(99,179,237,0.5)", "0 0 0px transparent"] }}
-          transition={{ duration: 3, repeat: Infinity }}
-        >
-          HS
-        </motion.span>
-        <span style={{ fontFamily: "monospace", fontSize: 7, letterSpacing: "0.25em", color: "rgba(255,255,255,0.22)", textTransform: "uppercase" }}>
-          Portfolio
-        </span>
-      </div>
-    </button>
-  );
-}
-
 /* ── Scroll progress bar (top edge) ── */
 function ScrollProgress({ pct }: { pct: number }) {
   return (
@@ -128,32 +37,6 @@ function ScrollProgress({ pct }: { pct: number }) {
         transition={{ duration: 0.1, ease: "linear" }}
       />
     </div>
-  );
-}
-
-/* ── Available badge ── */
-function AvailableBadge() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, delay: 1.4 }}
-      style={{
-        display: "flex", alignItems: "center", gap: 6,
-        border: "1px solid rgba(52,211,153,0.3)",
-        background: "rgba(52,211,153,0.07)",
-        borderRadius: 99, padding: "4px 10px",
-      }}
-    >
-      <motion.div
-        style={{ width: 6, height: 6, borderRadius: "50%", background: "#34d399", flexShrink: 0 }}
-        animate={{ boxShadow: ["0 0 0px rgba(52,211,153,0)", "0 0 8px rgba(52,211,153,0.9)", "0 0 0px rgba(52,211,153,0)"] }}
-        transition={{ duration: 1.6, repeat: Infinity }}
-      />
-      <span style={{ fontFamily: "monospace", fontSize: 8.5, letterSpacing: "0.18em", color: "rgba(52,211,153,0.85)", textTransform: "uppercase", whiteSpace: "nowrap" }}>
-        Available
-      </span>
-    </motion.div>
   );
 }
 
@@ -223,18 +106,15 @@ export function Navbar() {
 
       <div style={{ maxWidth: 1240, margin: "0 auto", padding: "0 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
 
-        {/* ── Logo ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-          <LogoMark onClick={() => scrollTo("hero")} />
-          <AvailableBadge />
-        </div>
+        {/* The left identity labels were intentionally removed for a cleaner reference-inspired header. */}
+        <div aria-hidden style={{ flex: 1 }} />
 
         {/* ── Floating nav pill ── */}
         <motion.div
           initial={{ opacity: 0, y: -16, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.7, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          style={{ position: "relative", display: "flex", alignItems: "center" }}
+          style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}
         >
           {/* Pill outer glow border */}
           <div style={{
