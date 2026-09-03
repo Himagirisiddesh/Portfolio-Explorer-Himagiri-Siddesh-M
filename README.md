@@ -82,7 +82,7 @@ Explore my:
 
 The portfolio follows a component-driven React architecture.
 
-```text
+text
 Portfolio-Explorer-Himagiri-Siddesh-M/
 │
 ├── artifacts/
@@ -193,4 +193,4 @@ Planned improvements may include:
 I'm always interested in connecting with developers, recruiters, companies, and people working on interesting technology.
 
 <p align="center"> <a href="https://github.com/Himagirisiddesh"> <img src="https://img.shields.io/badge/GitHub-Himagirisiddesh-181717?style=for-the-badge&logo=github" alt="GitHub"> </a> <a href="https://www.linkedin.com"> <img src="https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin" alt="LinkedIn"> </a> </p>
-<p align="center"> <strong>Built with curiosity, code, and a constant desire to improve.</strong> </p> <p align="center"> ⭐ If you find this project interesting, consider starring the repository. </p> ```
+<p align="center"> <strong>Built with curiosity, code, and a constant desire to improve.</strong> </p> <p align="center"> ⭐ If you find this project interesting, consider starring the repository. </p> 
