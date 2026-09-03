@@ -27,7 +27,7 @@ export function CustomCursor() {
     };
     const onOver = (event: PointerEvent) => {
       const target = event.target as HTMLElement | null;
-      setHovered(Boolean(target?.closest("a, button, [role='button'], input, textarea")));
+      setHovered(Boolean(target?.closest("a, button, [role='button'], input, textarea, [data-cursor-hover]")));
     };
     const onOut = () => setHovered(false);
 

@@ -156,7 +156,7 @@ export function Hero() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
         >
-          <h1>
+          <h1 data-cursor-hover>
             <small>Hi, I&apos;m</small>
             <span>Himagiri</span>
             <span>Siddesh M</span>
