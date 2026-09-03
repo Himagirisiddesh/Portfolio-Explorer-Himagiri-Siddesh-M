@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 import { MdLocationOn } from "react-icons/md";
 
-const PORTRAIT = "/himagiri-cutout.png";
+const PORTRAIT = "/himagiri-ai.png";
 const RESUME = "/himagiri-resume.pdf";
 
 /* Buttons have a small magnetic pull so the hero feels responsive, not static. */
@@ -154,17 +154,7 @@ export function Hero() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="hero-eyebrow">
-            <span />
-            <span>HELLO / 01</span>
-          </div>
-
-          <h1>
-            <small>Hi, I&apos;m</small>
-            <span>Himagiri</span>
-            <span>Siddesh M</span>
-          </h1>
-
+          <div className="hero-left-index">01 <span>PROFILE</span></div>
           <div className="hero-copy-rule">
             <motion.i
               animate={{ scaleX: [0.4, 1, 0.4], opacity: [0.35, 1, 0.35] }}
@@ -172,12 +162,23 @@ export function Hero() {
             />
           </div>
           <p className="hero-copy-caption">
-            Turning complex ideas into intelligent, useful digital experiences.
+            Engineering intelligent experiences where technology, design, and
+            human thinking meet.
           </p>
         </motion.div>
 
         {/* Center: portrait and light field */}
         <div className="hero-portrait-stage">
+          <motion.h1
+            className="hero-centered-title"
+            initial={{ opacity: 0, y: 18, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.9, delay: 0.52, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <span>Himagiri</span>
+            <span>Siddesh M</span>
+          </motion.h1>
+
           <div className="hero-portrait-rings" aria-hidden>
             <GlowRing size={620} opacity={0.18} delay={0} />
             <GlowRing size={500} opacity={0.22} delay={1.4} />
@@ -203,7 +204,6 @@ export function Hero() {
               animate={{ y: [0, -9, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
             />
-            <div className="hero-portrait-floor" aria-hidden />
           </motion.div>
 
           <motion.div
