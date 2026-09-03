@@ -6,9 +6,11 @@ import {
   FaCode,
   FaDownload,
   FaGraduationCap,
+  FaLinkedinIn,
   FaTrophy,
 } from "react-icons/fa";
 import { MdLocationOn } from "react-icons/md";
+import { SiGithub } from "react-icons/si";
 
 const PORTRAIT = "/himagiri-ai.png";
 const RESUME = "/himagiri-resume.pdf";
@@ -154,7 +156,6 @@ export function Hero() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="hero-left-index">01 <span>PROFILE</span></div>
           <div className="hero-copy-rule">
             <motion.i
               animate={{ scaleX: [0.4, 1, 0.4], opacity: [0.35, 1, 0.35] }}
@@ -197,23 +198,11 @@ export function Hero() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 1, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
-            <motion.img
+            <img
               src={PORTRAIT}
               alt="Himagiri Siddesh M"
               draggable={false}
-              animate={{ y: [0, -9, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
             />
-          </motion.div>
-
-          <motion.div
-            className="hero-portrait-marker"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.5 }}
-          >
-            <span />
-            HIMAGIRI SIDDESH · 2026
           </motion.div>
         </div>
 
@@ -277,12 +266,41 @@ export function Hero() {
             </MagneticButton>
           </div>
 
+          <div className="hero-socials" aria-label="Social profiles">
+            <a
+              href="https://www.linkedin.com/in/himagiri-siddesh-m-532b102a3"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <FaLinkedinIn size={13} />
+              LinkedIn
+            </a>
+            <a
+              href="https://github.com/Himagirisiddesh"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <SiGithub size={13} />
+              GitHub
+            </a>
+          </div>
+
           <div className="hero-location">
             <MdLocationOn size={15} aria-hidden />
             <span>Based in Bengaluru, India</span>
           </div>
         </motion.div>
       </div>
+
+      <motion.div
+        className="hero-scroll-cue"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 2 }}
+      >
+        <span className="hero-scroll-mouse"><i /></span>
+        <span>Scroll to explore</span>
+      </motion.div>
 
       {/* Reference-inspired metrics bar */}
       <motion.div
@@ -295,16 +313,6 @@ export function Hero() {
         <Stat icon={FaBriefcase} value="2+" label="Years Experience" delay={1.65} />
         <Stat icon={FaCode} value="4+" label="Projects" delay={1.75} />
         <Stat icon={FaTrophy} value="1+" label="Awards" delay={1.85} />
-      </motion.div>
-
-      <motion.div
-        className="hero-scroll-cue"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.7, delay: 2 }}
-      >
-        <span className="hero-scroll-mouse"><i /></span>
-        <span>Scroll to explore</span>
       </motion.div>
     </section>
   );

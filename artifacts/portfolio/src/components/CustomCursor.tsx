@@ -56,7 +56,14 @@ export function CustomCursor() {
     <>
       <motion.div
         aria-hidden
-        animate={{ opacity: visible ? 1 : 0, scale: hovered ? 0.7 : 1 }}
+        animate={{
+          opacity: visible ? 1 : 0,
+          scale: hovered ? 0.7 : 1,
+          borderColor: hovered ? "rgba(251, 146, 60, 0.98)" : "rgba(125,211,252,0.68)",
+          boxShadow: hovered
+            ? "0 0 26px rgba(249,115,22,0.58), inset 0 0 15px rgba(236,72,153,0.28)"
+            : "0 0 22px rgba(59,130,246,0.34), inset 0 0 12px rgba(139,92,246,0.16)",
+        }}
         transition={{ duration: 0.2 }}
         style={{
           position: "fixed",
@@ -82,8 +89,11 @@ export function CustomCursor() {
             borderRadius: "50%",
             border: "1px dashed rgba(167,139,250,0.65)",
           }}
-          animate={{ rotate: 360 }}
-          transition={{ duration: 4.5, repeat: Infinity, ease: "linear" }}
+          animate={{
+            rotate: 360,
+            borderColor: hovered ? "rgba(34, 211, 238, 0.95)" : "rgba(167,139,250,0.65)",
+          }}
+          transition={{ duration: hovered ? 1.6 : 4.5, repeat: Infinity, ease: "linear" }}
         />
         <span style={{
           position: "absolute",
@@ -91,8 +101,8 @@ export function CustomCursor() {
           top: -4,
           width: 1,
           height: 8,
-          background: "#7dd3fc",
-          boxShadow: "0 0 8px #38bdf8",
+           background: hovered ? "#fb7185" : "#7dd3fc",
+           boxShadow: hovered ? "0 0 12px #fb7185" : "0 0 8px #38bdf8",
         }} />
         <span style={{
           position: "absolute",
@@ -100,9 +110,24 @@ export function CustomCursor() {
           bottom: -4,
           width: 1,
           height: 8,
-          background: "#a78bfa",
-          boxShadow: "0 0 8px #8b5cf6",
+           background: hovered ? "#facc15" : "#a78bfa",
+           boxShadow: hovered ? "0 0 12px #facc15" : "0 0 8px #8b5cf6",
         }} />
+        <motion.span
+          style={{
+            position: "absolute",
+            inset: -9,
+            borderRadius: "50%",
+            border: "1px dotted rgba(45, 212, 191, 0.7)",
+            pointerEvents: "none",
+          }}
+          animate={{
+            opacity: hovered ? 1 : 0.22,
+            rotate: -360,
+            borderColor: hovered ? "rgba(244, 114, 182, 0.95)" : "rgba(45, 212, 191, 0.7)",
+          }}
+          transition={{ rotate: { duration: hovered ? 2.2 : 8, repeat: Infinity, ease: "linear" }, opacity: { duration: 0.18 } }}
+        />
       </motion.div>
 
       <motion.div

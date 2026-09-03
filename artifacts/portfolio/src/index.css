@@ -161,21 +161,6 @@
   z-index: 5;
 }
 
-.hero-left-index {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  color: rgba(147, 197, 253, 0.78);
-  font-family: "Space Mono", monospace;
-  font-size: 10px;
-  letter-spacing: 0.2em;
-}
-
-.hero-left-index span {
-  color: rgba(191, 219, 254, 0.36);
-  font-size: 8px;
-}
-
 .hero-eyebrow {
   display: flex;
   align-items: center;
@@ -338,31 +323,6 @@
   background: linear-gradient(to top, #050505 3%, rgba(5, 5, 5, 0.76) 32%, transparent);
 }
 
-.hero-portrait-marker {
-  position: absolute;
-  z-index: 4;
-  bottom: clamp(22px, 5vh, 54px);
-  left: 50%;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transform: translateX(-50%);
-  white-space: nowrap;
-  color: rgba(147, 197, 253, 0.68);
-  font-family: "Space Mono", monospace;
-  font-size: 8px;
-  letter-spacing: 0.16em;
-}
-
-.hero-portrait-marker span {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #38bdf8;
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.95);
-  animation: hero-pulse 1.8s ease-in-out infinite;
-}
-
 .hero-reference-side {
   align-self: center;
   min-width: 0;
@@ -414,6 +374,47 @@
 
 .hero-location svg {
   color: #38bdf8;
+}
+
+.hero-socials {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.hero-socials a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 1px solid rgba(147, 197, 253, 0.2);
+  border-radius: 5px;
+  color: rgba(219, 234, 254, 0.66);
+  font-family: "Space Mono", monospace;
+  font-size: 8px;
+  letter-spacing: 0.11em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.hero-socials a:first-child svg {
+  color: #38bdf8;
+}
+
+.hero-socials a:last-child svg {
+  color: #c084fc;
+}
+
+.hero-socials a:hover {
+  border-color: rgba(125, 211, 252, 0.65);
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(168, 85, 247, 0.16));
+  color: #fff;
+  transform: translateY(-2px);
 }
 
 .hero-stats {
@@ -471,19 +472,18 @@
 }
 
 .hero-scroll-cue {
-  position: absolute;
-  left: clamp(18px, 2vw, 34px);
-  bottom: 32px;
+  position: relative;
   z-index: 8;
+  align-self: center;
   display: flex;
   align-items: center;
   gap: 8px;
-  color: rgba(255, 255, 255, 0.28);
+  margin: 0 auto 13px;
+  color: rgba(191, 219, 254, 0.56);
   font-family: "Space Mono", monospace;
   font-size: 8px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  writing-mode: vertical-rl;
 }
 
 .hero-scroll-mouse {
@@ -614,6 +614,6 @@
   }
 
   .hero-scroll-cue {
-    display: none;
+    margin-bottom: 12px;
   }
 }
